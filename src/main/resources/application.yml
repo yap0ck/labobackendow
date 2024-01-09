@@ -1,4 +1,4 @@
-spring:
+Spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/overwatch
     username: postgres

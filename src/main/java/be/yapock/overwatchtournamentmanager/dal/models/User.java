@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 @NoArgsConstructor
 @Entity
 @Table(name = "User_", uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"username", "email", "battleNet"})
+        @UniqueConstraint(columnNames = {"username", "email", "battle_Net"})
 })
 public class User implements UserDetails {
     @Id
@@ -35,7 +35,7 @@ public class User implements UserDetails {
     @Column(length = 50, nullable = false)
     @Getter @Setter
     private String battleNet;
-    @Column(length = 50, nullable = false)
+    @Column(nullable = false)
     @Setter
     private String password;
     @Column(nullable = false)
@@ -62,7 +62,7 @@ public class User implements UserDetails {
 
     @Override
     public String getPassword() {
-        return null;
+        return password;
     }
 
     @Override
