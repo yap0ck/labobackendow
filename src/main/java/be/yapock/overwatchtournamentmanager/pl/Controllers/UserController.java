@@ -3,7 +3,10 @@ package be.yapock.overwatchtournamentmanager.pl.Controllers;
 import be.yapock.overwatchtournamentmanager.bll.user.UserService;
 import be.yapock.overwatchtournamentmanager.pl.models.user.LoginForm;
 import be.yapock.overwatchtournamentmanager.pl.models.user.UserForm;
+import be.yapock.overwatchtournamentmanager.pl.models.user.UserGetAllDto;
 import be.yapock.overwatchtournamentmanager.pl.models.user.UserGetOneDTO;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -46,5 +49,16 @@ public class UserController {
     @GetMapping("/{id}")
     public ResponseEntity<UserGetOneDTO> getOne(@PathVariable long id){
         return ResponseEntity.ok(UserGetOneDTO.fromEntity(userService.getOne(id)));
+    }
+
+    /**
+     * Endpoint envoyant une page d'utilisateur, seul les utilisateur connecté y ont accès
+     * @param pageable
+     * @return
+     */
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping
+    public ResponseEntity<Page<UserGetAllDto>> getAll(Pageable pageable){
+        return ResponseEntity.ok(userService.getAll(pageable).map(UserGetAllDto::fromEntity));
     }
 }

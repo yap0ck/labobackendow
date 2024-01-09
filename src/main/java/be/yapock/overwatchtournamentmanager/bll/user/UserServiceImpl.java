@@ -80,9 +80,14 @@ public class UserServiceImpl implements UserService{
         return userRepository.findById(id).orElseThrow(()->new EntityNotFoundException("utilisateur pas trouvé"));
     }
 
+    /**
+     * affiche tout les utilisateur sous forme de pagineation
+     * @param pageable parametres de la pagination
+     * @return Page de User
+     */
     @Override
     public Page<User> getAll(Pageable pageable) {
-        return null;
+        return userRepository.findAll(pageable);
     }
 
     @Override
