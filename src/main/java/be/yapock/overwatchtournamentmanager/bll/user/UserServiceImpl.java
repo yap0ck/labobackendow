@@ -1,11 +1,16 @@
 package be.yapock.overwatchtournamentmanager.bll.user;
 
 import be.yapock.overwatchtournamentmanager.dal.models.User;
+import be.yapock.overwatchtournamentmanager.dal.models.enums.UserRole;
 import be.yapock.overwatchtournamentmanager.dal.repositories.UserRepository;
 import be.yapock.overwatchtournamentmanager.pl.config.security.JWTProvider;
 import be.yapock.overwatchtournamentmanager.pl.models.user.AuthDTO;
 import be.yapock.overwatchtournamentmanager.pl.models.user.LoginForm;
 import be.yapock.overwatchtournamentmanager.pl.models.user.UserForm;
+import be.yapock.overwatchtournamentmanager.pl.models.user.UserSearchForm;
+import jakarta.persistence.EntityNotFoundException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -39,7 +44,7 @@ public class UserServiceImpl implements UserService{
         if (form==null) throw new IllegalArgumentException("le formulaire ne peut etre vide");
         User user = User.builder()
                 .email(form.email())
-                .userRoles(form.userRoles())
+                .userRoles(List.of(UserRole.PLAYER))
                 .battleNet(form.battleNet())
                 .dateOfBirth(form.dateOfBirth())
                 .ranking(form.ranking())
@@ -63,5 +68,35 @@ public class UserServiceImpl implements UserService{
         User user = userRepository.findByUsername(form.username()).orElseThrow(()-> new UsernameNotFoundException("utilisateur non trouvé"));
         String token = jwtProvider.generateToken(user.getUsername(), List.copyOf(user.getUserRoles()));
         return new AuthDTO(token, user.getUsername(),user.getUserRoles());
+    }
+
+    /**
+     * recherche un utilisateur spécifique
+     * @param id de l'utilisateur recherché
+     * @return User à affiché
+     */
+    @Override
+    public User getOne(long id) {
+        return userRepository.findById(id).orElseThrow(()->new EntityNotFoundException("utilisateur pas trouvé"));
+    }
+
+    @Override
+    public Page<User> getAll(Pageable pageable) {
+        return null;
+    }
+
+    @Override
+    public void update(long id, UserForm form) {
+
+    }
+
+    @Override
+    public void delete(long id) {
+
+    }
+
+    @Override
+    public Page<User> getAllBySpec(Pageable pageable, UserSearchForm form) {
+        return null;
     }
 }

@@ -1,21 +1,19 @@
 package be.yapock.overwatchtournamentmanager.pl.models.user;
 
+import be.yapock.overwatchtournamentmanager.dal.models.User;
 import be.yapock.overwatchtournamentmanager.dal.models.enums.InGameRole;
-import be.yapock.overwatchtournamentmanager.dal.models.enums.UserRole;
-import org.antlr.v4.runtime.misc.NotNull;
 
 import java.time.LocalDate;
 import java.util.List;
 
-public record UserForm(
-
+public record UserGetOneDTO(
         String username,
-        String email,
-        String battleNet,
-        String password,
+        String ranking,
         LocalDate dateOfBirth,
         char gender,
-        String ranking,
         List<InGameRole> inGameRoles
 ) {
+    public static UserGetOneDTO fromEntity(User user){
+        return new UserGetOneDTO(user.getUsername(),user.getRanking(),user.getDateOfBirth(),user.getGender(),user.getInGameRoles());
+    }
 }

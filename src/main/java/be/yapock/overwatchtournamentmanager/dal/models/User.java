@@ -52,6 +52,8 @@ public class User implements UserDetails {
     private List<UserRole> userRoles;
     @Getter @Setter
     private List<InGameRole> inGameRoles;
+    @Setter
+    private boolean isEnabled = true;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -87,6 +89,6 @@ public class User implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return true;
+        return isEnabled;
     }
 }

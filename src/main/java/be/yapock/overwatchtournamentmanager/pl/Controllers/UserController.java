@@ -3,11 +3,10 @@ package be.yapock.overwatchtournamentmanager.pl.Controllers;
 import be.yapock.overwatchtournamentmanager.bll.user.UserService;
 import be.yapock.overwatchtournamentmanager.pl.models.user.LoginForm;
 import be.yapock.overwatchtournamentmanager.pl.models.user.UserForm;
+import be.yapock.overwatchtournamentmanager.pl.models.user.UserGetOneDTO;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/user")
@@ -36,5 +35,16 @@ public class UserController {
     @PostMapping("/login")
     public void login(@RequestBody LoginForm form){
         userService.login(form);
+    }
+
+    /**
+     * endpoint envoyant les détails public d'un utilisateur. seul les utilisateurs connecté y ont accès
+     * @param id de l'utilisateur à afficher
+     * @return une response entity contenant le dto de l'utilisateur
+     */
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/{id}")
+    public ResponseEntity<UserGetOneDTO> getOne(@PathVariable long id){
+        return ResponseEntity.ok(UserGetOneDTO.fromEntity(userService.getOne(id)));
     }
 }
