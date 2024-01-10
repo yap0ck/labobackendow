@@ -9,6 +9,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -60,5 +61,17 @@ public class UserController {
     @GetMapping
     public ResponseEntity<Page<UserGetAllDto>> getAll(Pageable pageable){
         return ResponseEntity.ok(userService.getAll(pageable).map(UserGetAllDto::fromEntity));
+    }
+
+    /**
+     * met a jour les données de l'utilisateur
+     * @param id
+     * @param form
+     * @param authentication
+     */
+    @PreAuthorize("isAuthenticated()")
+    @PutMapping("/{id}")
+    public void update(@PathVariable long id, @RequestBody UserForm form, Authentication authentication) throws IllegalAccessException {
+        userService.update(id,form,authentication);
     }
 }

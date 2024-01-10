@@ -13,6 +13,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -90,9 +91,27 @@ public class UserServiceImpl implements UserService{
         return userRepository.findAll(pageable);
     }
 
+    /**
+     * met a jour les donnée de l'utilisateur, seul l'utilisateur
+     * @param id
+     * @param form
+     * @param authentication
+     * @throws IllegalAccessException
+     */
     @Override
-    public void update(long id, UserForm form) {
-
+    public void update(long id, UserForm form, Authentication authentication) throws IllegalAccessException {
+        User userConnected = userRepository.findByUsername(authentication.getName()).orElseThrow(()->new UsernameNotFoundException("utilisateur non trouvé"));
+        User user = getOne(id);
+        if (!user.equals(userConnected)) throw new IllegalAccessException("accès non authorisé");
+        user.setDateOfBirth(form.dateOfBirth());
+        user.setGender(form.gender());
+        user.setRanking(form.ranking());
+        user.setBattleNet(form.battleNet());
+        user.setEmail(form.email());
+        user.setPassword(passwordEncoder.encode(form.password()));
+        user.setUsername(form.username());
+        user.setInGameRoles(form.inGameRoles());
+        userRepository.save(user);
     }
 
     @Override
