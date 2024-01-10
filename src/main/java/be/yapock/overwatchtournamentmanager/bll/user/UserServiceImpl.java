@@ -114,9 +114,18 @@ public class UserServiceImpl implements UserService{
         userRepository.save(user);
     }
 
+    /**
+     * met a jour l'utilisateur en lui affectant un statut enable false lors de la suppression du compte. seul un admin ou l'utilisateur lui meme peut supprimer le compte
+     * @param id
+     * @param authentication
+     */
     @Override
-    public void delete(long id) {
-
+    public void delete(long id, Authentication authentication) {
+        User userConnected = userRepository.findByUsername(authentication.getName()).orElseThrow(()->new UsernameNotFoundException("utilisateur non trouvé"));
+        User user = getOne(id);
+        if (!user.equals(userConnected) || !userConnected.getUserRoles().contains(UserRole.ADMIN)) throw new IllegalArgumentException("accés non authorisé");
+        user.setEnabled(false);
+        userRepository.save(user);
     }
 
     @Override

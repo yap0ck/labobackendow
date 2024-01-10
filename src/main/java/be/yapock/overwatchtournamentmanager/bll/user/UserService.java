@@ -15,6 +15,6 @@ public interface UserService {
     User getOne(long id);
     Page<User> getAll(Pageable pageable);
     void update(long id, UserForm form, Authentication authentication) throws IllegalAccessException;
-    void delete(long id);
+    void delete(long id, Authentication authentication);
     Page<User> getAllBySpec(Pageable pageable, UserSearchForm form);
 }

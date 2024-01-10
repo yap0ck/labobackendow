@@ -74,4 +74,15 @@ public class UserController {
     public void update(@PathVariable long id, @RequestBody UserForm form, Authentication authentication) throws IllegalAccessException {
         userService.update(id,form,authentication);
     }
+
+    /**
+     * supprime un compte utilisateur
+     * @param id
+     * @param authentication
+     */
+    @PreAuthorize("isAuthenticated()")
+    @DeleteMapping("/{id}")
+    public void delete(@PathVariable long id, Authentication authentication){
+        userService.delete(id,authentication);
+    }
 }
