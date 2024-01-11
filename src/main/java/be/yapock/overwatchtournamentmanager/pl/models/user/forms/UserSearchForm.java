@@ -1,4 +1,4 @@
-package be.yapock.overwatchtournamentmanager.pl.models.user;
+package be.yapock.overwatchtournamentmanager.pl.models.user.forms;
 
 public record UserSearchForm(
         String username,

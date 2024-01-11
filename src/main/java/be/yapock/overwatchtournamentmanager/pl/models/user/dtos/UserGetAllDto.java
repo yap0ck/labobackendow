@@ -1,4 +1,4 @@
-package be.yapock.overwatchtournamentmanager.pl.models.user;
+package be.yapock.overwatchtournamentmanager.pl.models.user.dtos;
 
 import be.yapock.overwatchtournamentmanager.dal.models.User;
 import be.yapock.overwatchtournamentmanager.dal.models.enums.InGameRole;

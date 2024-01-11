@@ -1,8 +1,12 @@
 package be.yapock.overwatchtournamentmanager.pl.Controllers;
 
 import be.yapock.overwatchtournamentmanager.bll.user.UserService;
-import be.yapock.overwatchtournamentmanager.dal.models.User;
-import be.yapock.overwatchtournamentmanager.pl.models.user.*;
+import be.yapock.overwatchtournamentmanager.pl.models.user.dtos.UserGetAllDto;
+import be.yapock.overwatchtournamentmanager.pl.models.user.dtos.UserGetOneDTO;
+import be.yapock.overwatchtournamentmanager.pl.models.user.forms.LoginForm;
+import be.yapock.overwatchtournamentmanager.pl.models.user.forms.UserForm;
+import be.yapock.overwatchtournamentmanager.pl.models.user.forms.UserRoleUpdateForm;
+import be.yapock.overwatchtournamentmanager.pl.models.user.forms.UserSearchForm;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -98,5 +102,16 @@ public class UserController {
         return ResponseEntity.ok(userService.getAllBySpec(pageable, form).stream()
                 .map(UserGetAllDto::fromEntity)
                 .toList());
+    }
+
+    /**
+     * permet à un admin de changer le role d'un utilisateur
+     * @param id
+     * @param form
+     */
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PutMapping("/updaterole/{id}")
+    public void updateRole(@PathVariable long id, @RequestBody UserRoleUpdateForm form){
+        userService.updateUserRole(id,form);
     }
 }

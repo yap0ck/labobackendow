@@ -1,4 +1,4 @@
-package be.yapock.overwatchtournamentmanager.pl.models.user;
+package be.yapock.overwatchtournamentmanager.pl.models.user.forms;
 
 import be.yapock.overwatchtournamentmanager.dal.models.enums.InGameRole;
 import be.yapock.overwatchtournamentmanager.dal.models.enums.UserRole;
@@ -13,6 +13,7 @@ public record UserForm(
         String email,
         String battleNet,
         String password,
+        String confirmedPassword,
         LocalDate dateOfBirth,
         char gender,
         String ranking,

@@ -4,12 +4,14 @@ import be.yapock.overwatchtournamentmanager.dal.models.User;
 import be.yapock.overwatchtournamentmanager.dal.models.enums.UserRole;
 import be.yapock.overwatchtournamentmanager.dal.repositories.UserRepository;
 import be.yapock.overwatchtournamentmanager.pl.config.security.JWTProvider;
-import be.yapock.overwatchtournamentmanager.pl.models.user.AuthDTO;
-import be.yapock.overwatchtournamentmanager.pl.models.user.LoginForm;
-import be.yapock.overwatchtournamentmanager.pl.models.user.UserForm;
-import be.yapock.overwatchtournamentmanager.pl.models.user.UserSearchForm;
+import be.yapock.overwatchtournamentmanager.pl.models.user.dtos.AuthDTO;
+import be.yapock.overwatchtournamentmanager.pl.models.user.forms.LoginForm;
+import be.yapock.overwatchtournamentmanager.pl.models.user.forms.UserForm;
+import be.yapock.overwatchtournamentmanager.pl.models.user.forms.UserRoleUpdateForm;
+import be.yapock.overwatchtournamentmanager.pl.models.user.forms.UserSearchForm;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.criteria.Predicate;
+import lombok.SneakyThrows;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -46,6 +48,7 @@ public class UserServiceImpl implements UserService{
     @Override
     public void register(UserForm form) {
         if (form==null) throw new IllegalArgumentException("le formulaire ne peut etre vide");
+        if (!form.password().equals(form.confirmedPassword())) throw new IllegalArgumentException("les mots de passe doivent etre identique");
         User user = User.builder()
                 .email(form.email())
                 .userRoles(List.of(UserRole.PLAYER))
@@ -103,6 +106,7 @@ public class UserServiceImpl implements UserService{
      */
     @Override
     public void update(long id, UserForm form, Authentication authentication) throws IllegalAccessException {
+        if (!form.password().equals(form.confirmedPassword())) throw new IllegalArgumentException("les mots de passe doivent etre identique");
         User userConnected = userRepository.findByUsername(authentication.getName()).orElseThrow(()->new UsernameNotFoundException("utilisateur non trouvé"));
         User user = getOne(id);
         if (!user.equals(userConnected)) throw new IllegalAccessException("accès non authorisé");
@@ -122,11 +126,12 @@ public class UserServiceImpl implements UserService{
      * @param id
      * @param authentication
      */
+    @SneakyThrows
     @Override
     public void delete(long id, Authentication authentication) {
         User userConnected = userRepository.findByUsername(authentication.getName()).orElseThrow(()->new UsernameNotFoundException("utilisateur non trouvé"));
         User user = getOne(id);
-        if (!user.equals(userConnected) || !userConnected.getUserRoles().contains(UserRole.ADMIN)) throw new IllegalArgumentException("accés non authorisé");
+        if (!user.equals(userConnected) || !userConnected.getUserRoles().contains(UserRole.ADMIN)) throw new IllegalAccessException("accés non authorisé");
         user.setEnabled(false);
         userRepository.save(user);
     }
@@ -158,5 +163,19 @@ public class UserServiceImpl implements UserService{
             if (form.inGameRole()!=null) predicates.add(criteriaBuilder.equal(root.get("in_game_roles"), form.inGameRole()));
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
         });
+    }
+
+    /**
+     * Methode permettant a un admin de modifié le role d'un utilisateur
+     * @param id
+     * @param form
+     * @param authentication
+     */
+
+    @Override
+    public void updateUserRole(long id, UserRoleUpdateForm form) {
+        User user = getOne(id);
+        user.setUserRoles(form.roles());
+        userRepository.save(user);
     }
 }

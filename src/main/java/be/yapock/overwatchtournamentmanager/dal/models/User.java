@@ -54,6 +54,7 @@ public class User implements UserDetails {
     private List<InGameRole> inGameRoles;
     @Setter
     private boolean isEnabled = true;
+    //TODO modifier role et Ranking pour en faire une entité a part chaque utilisateur aura donc song rang par rapport à son role
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
