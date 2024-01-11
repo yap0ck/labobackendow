@@ -9,8 +9,10 @@ import be.yapock.overwatchtournamentmanager.pl.models.user.LoginForm;
 import be.yapock.overwatchtournamentmanager.pl.models.user.UserForm;
 import be.yapock.overwatchtournamentmanager.pl.models.user.UserSearchForm;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -18,6 +20,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -128,8 +131,32 @@ public class UserServiceImpl implements UserService{
         userRepository.save(user);
     }
 
+    /**
+     * effectue une recherche par spécifications définies dans createSpecification
+     * @param pageable
+     * @param form
+     * @return list d'utilisateur
+     */
     @Override
     public Page<User> getAllBySpec(Pageable pageable, UserSearchForm form) {
-        return null;
+        Specification<User> spec = createSpecification(form);
+        return userRepository.findAll(spec,pageable);
+    }
+
+    /**
+     * mise en place des spécification pour la recherche par spec, les champs sont username, ranking, email, battleNet, et role en jeu
+     * @param form
+     * @return les predicates
+     */
+    private Specification<User> createSpecification(UserSearchForm form){
+        return ((root, query, criteriaBuilder) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            if (form.username()!=null) predicates.add(criteriaBuilder.like(root.get("username"), "%"+form.username()+"%"));
+            if (form.ranking()!=null) predicates.add(criteriaBuilder.like(root.get("ranking"), "%"+ form.ranking()+ "%"));
+            if (form.email()!=null) predicates.add(criteriaBuilder.like(root.get("email"), "%"+ form.email()+"%"));
+            if (form.battleNet()!=null) predicates.add(criteriaBuilder.like(root.get("battle_net"),"%"+form.battleNet()+"%"));
+            if (form.inGameRole()!=null) predicates.add(criteriaBuilder.equal(root.get("in_game_roles"), form.inGameRole()));
+            return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+        });
     }
 }

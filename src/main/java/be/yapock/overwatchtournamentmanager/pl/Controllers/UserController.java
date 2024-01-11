@@ -1,16 +1,16 @@
 package be.yapock.overwatchtournamentmanager.pl.Controllers;
 
 import be.yapock.overwatchtournamentmanager.bll.user.UserService;
-import be.yapock.overwatchtournamentmanager.pl.models.user.LoginForm;
-import be.yapock.overwatchtournamentmanager.pl.models.user.UserForm;
-import be.yapock.overwatchtournamentmanager.pl.models.user.UserGetAllDto;
-import be.yapock.overwatchtournamentmanager.pl.models.user.UserGetOneDTO;
+import be.yapock.overwatchtournamentmanager.dal.models.User;
+import be.yapock.overwatchtournamentmanager.pl.models.user.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/user")
@@ -84,5 +84,19 @@ public class UserController {
     @DeleteMapping("/{id}")
     public void delete(@PathVariable long id, Authentication authentication){
         userService.delete(id,authentication);
+    }
+
+    /**
+     * recherche par spécification
+     * @param form
+     * @param pageable
+     * @return
+     */
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/search")
+    public ResponseEntity<List<UserGetAllDto>> getallbyspec(@RequestBody UserSearchForm form, Pageable pageable){
+        return ResponseEntity.ok(userService.getAllBySpec(pageable, form).stream()
+                .map(UserGetAllDto::fromEntity)
+                .toList());
     }
 }
