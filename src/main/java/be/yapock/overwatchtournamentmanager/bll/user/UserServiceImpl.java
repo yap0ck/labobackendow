@@ -5,10 +5,7 @@ import be.yapock.overwatchtournamentmanager.dal.models.enums.UserRole;
 import be.yapock.overwatchtournamentmanager.dal.repositories.UserRepository;
 import be.yapock.overwatchtournamentmanager.pl.config.security.JWTProvider;
 import be.yapock.overwatchtournamentmanager.pl.models.user.dtos.AuthDTO;
-import be.yapock.overwatchtournamentmanager.pl.models.user.forms.LoginForm;
-import be.yapock.overwatchtournamentmanager.pl.models.user.forms.UserForm;
-import be.yapock.overwatchtournamentmanager.pl.models.user.forms.UserRoleUpdateForm;
-import be.yapock.overwatchtournamentmanager.pl.models.user.forms.UserSearchForm;
+import be.yapock.overwatchtournamentmanager.pl.models.user.forms.*;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.criteria.Predicate;
 import lombok.SneakyThrows;
@@ -169,7 +166,6 @@ public class UserServiceImpl implements UserService{
      * Methode permettant a un admin de modifié le role d'un utilisateur
      * @param id
      * @param form
-     * @param authentication
      */
 
     @Override
@@ -177,5 +173,15 @@ public class UserServiceImpl implements UserService{
         User user = getOne(id);
         user.setUserRoles(form.roles());
         userRepository.save(user);
+    }
+
+    @Override
+    public void resetPasswordRequest(long id) {
+
+    }
+
+    @Override
+    public void resetPassword(String token, ResetPasswordForm form) {
+
     }
 }

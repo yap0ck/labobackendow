@@ -3,10 +3,10 @@ package be.yapock.overwatchtournamentmanager.pl.models.user.forms;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
-public record LoginForm(
+public record ResetPasswordForm(
         @NotNull @NotBlank
-        String username,
+        String password,
         @NotNull @NotBlank
-        String password
+        String confirmedPassword
 ) {
 }

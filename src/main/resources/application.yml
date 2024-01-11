@@ -13,5 +13,17 @@ Spring:
         format_sql: true
     database: postgresql
 
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: playzoneguichet@gmail.com
+    password: yywbrfhwfrwfhaix
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
 server:
   port: 8081
