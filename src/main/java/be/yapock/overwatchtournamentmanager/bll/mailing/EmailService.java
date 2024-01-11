@@ -22,6 +22,11 @@ public class EmailService {
     @Autowired
     private SpringTemplateEngine springTemplateEngine;
 
+    /**
+     * envoye un mail de reset de mot de passe
+     * @param user
+     * @throws MessagingException
+     */
     public void sendPasswordResetRequest(User user) throws MessagingException{
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message,

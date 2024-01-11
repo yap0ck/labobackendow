@@ -114,4 +114,14 @@ public class UserController {
     public void updateRole(@PathVariable long id, @RequestBody UserRoleUpdateForm form){
         userService.updateUserRole(id,form);
     }
+
+    /**
+     * l'administrateur envoi un email de reste de mot de passe
+     * @param id
+     */
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PostMapping("/resetpassword/{id}")
+    public void resetPasswordRequest(@PathVariable long id){
+        userService.resetPasswordRequest(id);
+    }
 }

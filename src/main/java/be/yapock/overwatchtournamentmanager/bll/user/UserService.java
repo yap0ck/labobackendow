@@ -17,5 +17,4 @@ public interface UserService {
     Page<User> getAllBySpec(Pageable pageable, UserSearchForm form);
     void updateUserRole(long id, UserRoleUpdateForm form);
     void resetPasswordRequest(long id);
-    void resetPassword(String token, ResetPasswordForm form);
 }

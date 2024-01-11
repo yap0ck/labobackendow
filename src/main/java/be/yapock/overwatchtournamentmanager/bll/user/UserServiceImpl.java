@@ -1,5 +1,6 @@
 package be.yapock.overwatchtournamentmanager.bll.user;
 
+import be.yapock.overwatchtournamentmanager.bll.mailing.EmailService;
 import be.yapock.overwatchtournamentmanager.dal.models.User;
 import be.yapock.overwatchtournamentmanager.dal.models.enums.UserRole;
 import be.yapock.overwatchtournamentmanager.dal.repositories.UserRepository;
@@ -19,6 +20,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,12 +31,14 @@ public class UserServiceImpl implements UserService{
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JWTProvider jwtProvider;
+    private final EmailService emailService;
 
-    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager, JWTProvider jwtProvider) {
+    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager, JWTProvider jwtProvider, EmailService emailService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;
         this.jwtProvider = jwtProvider;
+        this.emailService = emailService;
     }
 
 
@@ -175,13 +179,25 @@ public class UserServiceImpl implements UserService{
         userRepository.save(user);
     }
 
+    /**
+     * Change le mot de passe de l'utilisateur par un mot de passe aléatoire avant de lui envoyer par mail
+     * @param id
+     */
+    @SneakyThrows
     @Override
     public void resetPasswordRequest(long id) {
-
+        User user = getOne(id);
+        user.setPassword(generatePassword());
+        userRepository.save(user);
+        emailService.sendPasswordResetRequest(user);
     }
 
-    @Override
-    public void resetPassword(String token, ResetPasswordForm form) {
-
+    private static String generatePassword(){
+        SecureRandom random = new SecureRandom();
+        return random.ints(48,122 +1)
+                .filter(i -> Character.isAlphabetic(i)|| Character.isDigit(i))
+                .limit(10)
+                .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
+                .toString();
     }
 }
