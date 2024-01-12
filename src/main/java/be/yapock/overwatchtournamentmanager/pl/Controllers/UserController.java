@@ -1,6 +1,7 @@
 package be.yapock.overwatchtournamentmanager.pl.Controllers;
 
 import be.yapock.overwatchtournamentmanager.bll.user.UserService;
+import be.yapock.overwatchtournamentmanager.pl.models.user.dtos.AuthDTO;
 import be.yapock.overwatchtournamentmanager.pl.models.user.dtos.UserGetAllDto;
 import be.yapock.overwatchtournamentmanager.pl.models.user.dtos.UserGetOneDTO;
 import be.yapock.overwatchtournamentmanager.pl.models.user.forms.LoginForm;
@@ -41,8 +42,8 @@ public class UserController {
      */
     @PreAuthorize("isAnonymous()")
     @PostMapping("/login")
-    public void login(@RequestBody LoginForm form){
-        userService.login(form);
+    public AuthDTO login(@RequestBody LoginForm form){
+        return userService.login(form);
     }
 
     /**
@@ -50,6 +51,7 @@ public class UserController {
      * @param id de l'utilisateur à afficher
      * @return une response entity contenant le dto de l'utilisateur
      */
+
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/{id}")
     public ResponseEntity<UserGetOneDTO> getOne(@PathVariable long id){

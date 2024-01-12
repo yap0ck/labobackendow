@@ -9,6 +9,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -45,6 +46,7 @@ public class User implements UserDetails {
     @Getter @Setter
     private char gender;
     @Column(length = 15, nullable = false)
+    //TODO faire une enum
     @Getter @Setter
     private String ranking;
     @Column(nullable = false)

@@ -16,6 +16,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -60,6 +61,7 @@ public class UserServiceImpl implements UserService{
                 .inGameRoles(form.inGameRoles())
                 .username(form.username())
                 .password(passwordEncoder.encode(form.password()))
+                .isEnabled(true)
                 .build();
         userRepository.save(user);
     }
@@ -72,7 +74,11 @@ public class UserServiceImpl implements UserService{
     @Override
     public AuthDTO login(LoginForm form) {
         if (form== null) throw new IllegalArgumentException("le formulaire ne peut etre vide");
-        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(form.username(),form.password()));
+        try {
+            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(form.username(),form.password()));
+        }catch (AuthenticationException e){
+            System.out.println(e.getMessage());
+        }
         User user = userRepository.findByUsername(form.username()).orElseThrow(()-> new UsernameNotFoundException("utilisateur non trouvé"));
         String token = jwtProvider.generateToken(user.getUsername(), List.copyOf(user.getUserRoles()));
         return new AuthDTO(token, user.getUsername(),user.getUserRoles());
@@ -107,7 +113,7 @@ public class UserServiceImpl implements UserService{
      */
     @Override
     public void update(long id, UserForm form, Authentication authentication) throws IllegalAccessException {
-        if (!form.password().equals(form.confirmedPassword())) throw new IllegalArgumentException("les mots de passe doivent etre identique");
+        if (form==null||!form.password().equals(form.confirmedPassword()) ) throw new IllegalArgumentException("les mots de passe doivent etre identique ou le formulaire ne peut etre null");
         User userConnected = userRepository.findByUsername(authentication.getName()).orElseThrow(()->new UsernameNotFoundException("utilisateur non trouvé"));
         User user = getOne(id);
         if (!user.equals(userConnected)) throw new IllegalAccessException("accès non authorisé");
@@ -132,7 +138,7 @@ public class UserServiceImpl implements UserService{
     public void delete(long id, Authentication authentication) {
         User userConnected = userRepository.findByUsername(authentication.getName()).orElseThrow(()->new UsernameNotFoundException("utilisateur non trouvé"));
         User user = getOne(id);
-        if (!user.equals(userConnected) || !userConnected.getUserRoles().contains(UserRole.ADMIN)) throw new IllegalAccessException("accés non authorisé");
+        if (!user.equals(userConnected) && !userConnected.getUserRoles().contains(UserRole.ADMIN)) throw new IllegalAccessException("accés non authorisé");
         user.setEnabled(false);
         userRepository.save(user);
     }
@@ -174,6 +180,7 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public void updateUserRole(long id, UserRoleUpdateForm form) {
+        if (form==null)throw new IllegalArgumentException("formulaire ne peut etre vide");
         User user = getOne(id);
         user.setUserRoles(form.roles());
         userRepository.save(user);

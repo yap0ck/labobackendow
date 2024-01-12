@@ -23,7 +23,7 @@ public class JWTProvider {
     private static final String JWT_SECRET = "p3/}pQkQBB83c{.J2K=d3gA@6Q^jHzjH6%92+6()Wx[Aeq93Q!2t";
     private static final long EXPIRES_AT = 900_000;
     private static final String AUTH_HEADER = "Authorization";
-    private static final String TOKEN_PREFIX = "Bearer";
+    private static final String TOKEN_PREFIX = "Bearer ";
     private final UserDetailsService userDetailsService;
     public JWTProvider(UserDetailsService userDetailsService) {
         this.userDetailsService = userDetailsService;

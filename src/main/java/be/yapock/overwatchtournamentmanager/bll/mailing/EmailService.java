@@ -53,7 +53,7 @@ public class EmailService {
         mailSender.send(message);
     }
 
-    private String getHtmlContent(Mail mail){
+    String getHtmlContent(Mail mail){
         Context context = new Context();
         context.setVariables(mail.getMailTemplate().getProps());
         return springTemplateEngine.process(mail.getMailTemplate().getTemplate(), context);
