@@ -1,8 +1,10 @@
 package be.yapock.overwatchtournamentmanager.dal.utils;
 
+import be.yapock.overwatchtournamentmanager.dal.models.Team;
 import be.yapock.overwatchtournamentmanager.dal.models.User;
 import be.yapock.overwatchtournamentmanager.dal.models.enums.InGameRole;
 import be.yapock.overwatchtournamentmanager.dal.models.enums.UserRole;
+import be.yapock.overwatchtournamentmanager.dal.repositories.TeamRepository;
 import be.yapock.overwatchtournamentmanager.dal.repositories.UserRepository;
 import com.github.javafaker.Faker;
 import org.springframework.beans.factory.InitializingBean;
@@ -18,11 +20,13 @@ import java.util.Locale;
 public class DataInit implements InitializingBean {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final TeamRepository teamRepository;
     boolean initialisation=true;
 
-    public DataInit(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public DataInit(UserRepository userRepository, PasswordEncoder passwordEncoder, TeamRepository teamRepository) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.teamRepository = teamRepository;
     }
 
     @Override
@@ -79,7 +83,15 @@ public class DataInit implements InitializingBean {
                 user1.setDateOfBirth(LocalDate.of(2005-i,6,13));
                 userRepository.save(user1);
             }
+            for (int i = 0; i < 5; i++) {
+                Team team = Team.builder()
+                        .teamElo(1200)
+                        .teamName(fakerFR.overwatch().quote())
+                        .captain(userRepository.findById((long) i+1).get())
+                        .creationDate(LocalDate.now())
+                        .build();
+                teamRepository.save(team);
+            }
         }
-
     }
 }

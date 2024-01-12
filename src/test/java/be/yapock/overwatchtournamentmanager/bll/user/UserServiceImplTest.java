@@ -1,6 +1,7 @@
 package be.yapock.overwatchtournamentmanager.bll.user;
 
 import be.yapock.overwatchtournamentmanager.bll.mailing.EmailService;
+import be.yapock.overwatchtournamentmanager.dal.models.Team;
 import be.yapock.overwatchtournamentmanager.dal.models.User;
 import be.yapock.overwatchtournamentmanager.dal.models.enums.InGameRole;
 import be.yapock.overwatchtournamentmanager.dal.models.enums.UserRole;
@@ -63,7 +64,8 @@ class UserServiceImplTest {
 
     @BeforeEach
     void setUp(){
-        user = new User(1L, "username", "mail@exemple.com", "battlenet", "password", LocalDate.now(), 'M', "rank",Collections.singletonList(UserRole.PLAYER), Collections.singletonList(InGameRole.SUPPORT),true);
+        Team team= Team.builder().build();
+        user = new User(1L, "username", "mail@exemple.com", "battlenet", "password", LocalDate.now(), 'M', "rank",Collections.singletonList(UserRole.PLAYER), Collections.singletonList(InGameRole.SUPPORT),true,team);
         oneDTO = new UserGetOneDTO(user.getId(), user.getUsername(), user.getRanking(), user.getDateOfBirth(), user.getGender(), user.getInGameRoles(), user.getUserRoles());
         allDto = new UserGetAllDto(user.getId(), user.getUsername(),user.getInGameRoles(), user.getRanking());
         userForm = new UserForm(user.getUsername(),user.getEmail(), user.getBattleNet(), user.getPassword(), user.getPassword(), user.getDateOfBirth(), user.getGender(), user.getRanking(), user.getInGameRoles());

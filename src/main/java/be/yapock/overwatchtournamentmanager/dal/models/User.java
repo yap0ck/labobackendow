@@ -56,6 +56,9 @@ public class User implements UserDetails {
     private List<InGameRole> inGameRoles;
     @Setter
     private boolean isEnabled = true;
+    @ManyToOne
+    @JoinColumn(name = "team_id")
+    private Team team;
     //TODO modifier role et Ranking pour en faire une entité a part chaque utilisateur aura donc song rang par rapport à son role
 
     @Override
