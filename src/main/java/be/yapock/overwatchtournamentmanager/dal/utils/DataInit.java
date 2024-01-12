@@ -33,11 +33,11 @@ public class DataInit implements InitializingBean {
     public void afterPropertiesSet() throws Exception {
         Faker fakerFR = Faker.instance(new Locale("fr-FR"));
         User user = User.builder()
-                .password(passwordEncoder.encode("admin"))
+                .password(passwordEncoder.encode("string"))
                 .gender('M')
                 .email("vagocol930@ziragold.com")
-                .username("admin")
-                .userRoles(Collections.singletonList(UserRole.ADMIN))
+                .username("string")
+                .userRoles(Collections.singletonList(UserRole.PLAYER))
                 .ranking("Master")
                 .inGameRoles(Collections.singletonList(InGameRole.TANK))
                 .dateOfBirth(LocalDate.now())
@@ -83,7 +83,7 @@ public class DataInit implements InitializingBean {
                 user1.setDateOfBirth(LocalDate.of(2005-i,6,13));
                 userRepository.save(user1);
             }
-            for (int i = 0; i < 5; i++) {
+            for (int i = 1; i < 6; i++) {
                 Team team = Team.builder()
                         .teamElo(1200)
                         .teamName(fakerFR.overwatch().quote())
