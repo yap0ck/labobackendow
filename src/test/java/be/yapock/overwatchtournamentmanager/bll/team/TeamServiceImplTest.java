@@ -60,7 +60,7 @@ class TeamServiceImplTest {
         List<User> players = new ArrayList<>();
         players.add(user);
         form = new TeamForm("username", 1200,2L,playerIds);
-        entity = new Team(1L, LocalDate.now(),form.teamName(), form.teamElo(), userConnected, players);
+        entity = new Team(1L, LocalDate.now(),form.teamName(), form.teamElo(), userConnected, players,true);
 
     }
 

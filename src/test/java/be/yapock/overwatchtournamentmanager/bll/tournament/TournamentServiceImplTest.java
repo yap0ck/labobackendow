@@ -3,6 +3,7 @@ package be.yapock.overwatchtournamentmanager.bll.tournament;
 import be.yapock.overwatchtournamentmanager.dal.models.Tournament;
 import be.yapock.overwatchtournamentmanager.dal.models.enums.TournamentCategories;
 import be.yapock.overwatchtournamentmanager.dal.models.enums.TournamentStatus;
+import be.yapock.overwatchtournamentmanager.dal.repositories.TeamRepository;
 import be.yapock.overwatchtournamentmanager.dal.repositories.TournamentRepository;
 import be.yapock.overwatchtournamentmanager.pl.models.tournament.forms.TournamentForm;
 import jakarta.persistence.Entity;
@@ -25,6 +26,8 @@ import static org.mockito.Mockito.*;
 class TournamentServiceImplTest {
     @Mock
     private TournamentRepository tournamentRepository;
+    @Mock
+    private TeamRepository teamRepository;
     @InjectMocks
     private TournamentServiceImpl tournamentService;
     private Tournament entity;

@@ -44,15 +44,18 @@ public class TeamServiceImpl implements TeamService {
         if (form==null) throw new IllegalArgumentException("form ne peut etre vide");
         User userConnected = userRepository.findByUsername(authentication.getName()).orElseThrow(()->new UsernameNotFoundException("Utilisateur non trouvé"));
         if (teamRepository.existsByPlayerListContaining(userConnected)) throw new IllegalArgumentException("l'utilisateur ne peut pas creer d'équipe si il fait partie d'une équipe");
+        List<User> userList = form.playerListId().stream()
+                .map(userService::getOne)
+                .toList();
         Team team = Team.builder()
                 .creationDate(LocalDate.now())
                 .teamElo(1200)
                 .captain(userConnected)
                 .teamName(form.teamName())
-                .playerList(form.playerListId().stream()
-                        .map(userService::getOne)
-                        .toList())
+                .playerList(userList)
+                .isAllWomen(userList.stream().noneMatch(e -> e.getGender() == 'M' || e.getGender() == 'O'))
                 .build();
+
         teamRepository.save(team);
     }
 
@@ -90,10 +93,12 @@ public class TeamServiceImpl implements TeamService {
         User userConnected = userRepository.findByUsername(authentication.getName()).orElseThrow(()-> new UsernameNotFoundException("utilisateur pas trouvé"));
         //TODO ajouter la possibilité a l'admin de changer le nom de l'équipe si contraire a LA NETIQUETTE
         if (!userConnected.equals(teamToUpdate.getCaptain()) && !userConnected.getUserRoles().contains(UserRole.ADMIN)) throw  new BadCredentialsException("l'utilisateur connecté ne peut modifier cette équipe");
-        teamToUpdate.setCaptain(userService.getOne(form.Captainid()));
-        teamToUpdate.setPlayerList(form.playerListId().stream()
+        List<User> userList = form.playerListId().stream()
                 .map(userService::getOne)
-                .toList());
+                .toList();
+        teamToUpdate.setCaptain(userService.getOne(form.Captainid()));
+        teamToUpdate.setPlayerList(userList);
+        teamToUpdate.setAllWomen(userList.stream().noneMatch(e -> e.getGender() == 'M'|| e.getGender() == 'O'));
         teamRepository.save(teamToUpdate);
     }
 

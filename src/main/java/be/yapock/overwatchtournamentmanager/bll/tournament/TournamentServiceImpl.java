@@ -1,10 +1,13 @@
 package be.yapock.overwatchtournamentmanager.bll.tournament;
 
+import be.yapock.overwatchtournamentmanager.bll.mailing.EmailService;
 import be.yapock.overwatchtournamentmanager.dal.models.Tournament;
 import be.yapock.overwatchtournamentmanager.dal.models.enums.TournamentStatus;
+import be.yapock.overwatchtournamentmanager.dal.repositories.TeamRepository;
 import be.yapock.overwatchtournamentmanager.dal.repositories.TournamentRepository;
 import be.yapock.overwatchtournamentmanager.dal.repositories.UserRepository;
 import be.yapock.overwatchtournamentmanager.pl.models.tournament.forms.TournamentForm;
+import jakarta.mail.MessagingException;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
@@ -13,11 +16,13 @@ import java.time.LocalDate;
 @Service
 public class TournamentServiceImpl implements TournamentService{
     private final TournamentRepository tournamentRepository;
-    private final UserRepository userRepository;
+    private final TeamRepository teamRepository;
+    private final EmailService emailService;
 
-    public TournamentServiceImpl(TournamentRepository tournamentRepository, UserRepository userRepository) {
+    public TournamentServiceImpl(TournamentRepository tournamentRepository, UserRepository userRepository, TeamRepository teamRepository, EmailService emailService) {
         this.tournamentRepository = tournamentRepository;
-        this.userRepository = userRepository;
+        this.teamRepository = teamRepository;
+        this.emailService = emailService;
     }
 
     /**
@@ -41,6 +46,13 @@ public class TournamentServiceImpl implements TournamentService{
                 .startingDateTime(form.startingDateTime())
                 .creationDate(LocalDate.now())
                 .build();
+        teamRepository.findAllByAllWomenAndTeamEloBetween(tournament.isWomenOnly(), tournament.getMinElo(), tournament.getMaxElo()).stream().forEach(e-> {
+            try {
+                emailService.sendInvititionalMail(e);
+            } catch (MessagingException ex) {
+                throw new RuntimeException(ex);
+            }
+        });
         tournamentRepository.save(tournament);
     }
 }

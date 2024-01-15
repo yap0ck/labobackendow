@@ -1,5 +1,6 @@
 package be.yapock.overwatchtournamentmanager.bll.mailing;
 
+import be.yapock.overwatchtournamentmanager.dal.models.Team;
 import be.yapock.overwatchtournamentmanager.dal.models.User;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
@@ -51,6 +52,38 @@ public class EmailService {
         helper.setText(html,true);
 
         mailSender.send(message);
+    }
+
+    public void sendInvititionalMail(Team team) throws MessagingException{
+        MimeMessage message = mailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message,
+                MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
+                StandardCharsets.UTF_8.name());
+        Map<String, Object> properties = new HashMap<>();
+
+        team.getPlayerList().forEach(e-> {
+            properties.put("username", e.getUsername());
+            Mail mail = Mail.builder()
+                    .to(e.getEmail())
+                    .from("playzoneguichet@gmail.com")
+                    .subject("Un tournoi correspond a vôtre équipe")
+                    .mailTemplate(new Mail.MailTemplate("invitationTournoi",properties))
+                    .build();
+            String html = getHtmlContent(mail);
+
+            try {
+                helper.setTo(mail.getTo());
+                helper.setFrom(mail.getFrom());
+                helper.setSubject(mail.getSubject());
+                helper.setText(html,true);
+            } catch (MessagingException ex){
+                throw new RuntimeException(ex);
+            }
+
+
+            mailSender.send(message);
+
+        });
     }
 
     String getHtmlContent(Mail mail){

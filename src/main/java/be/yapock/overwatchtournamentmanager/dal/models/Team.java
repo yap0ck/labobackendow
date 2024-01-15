@@ -30,4 +30,6 @@ public class Team {
     @OneToMany(mappedBy = "team")
     @Getter @Setter
     private List<User> playerList;
+    @Getter @Setter
+    private boolean isAllWomen;
 }
