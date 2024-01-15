@@ -3,12 +3,14 @@ package be.yapock.overwatchtournamentmanager.bll.team;
 import be.yapock.overwatchtournamentmanager.bll.user.UserService;
 import be.yapock.overwatchtournamentmanager.dal.models.Team;
 import be.yapock.overwatchtournamentmanager.dal.models.User;
+import be.yapock.overwatchtournamentmanager.dal.models.enums.UserRole;
 import be.yapock.overwatchtournamentmanager.dal.repositories.TeamRepository;
 import be.yapock.overwatchtournamentmanager.dal.repositories.UserRepository;
 import be.yapock.overwatchtournamentmanager.pl.models.team.forms.TeamForm;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -68,5 +70,25 @@ public class TeamServiceImpl implements TeamService {
     @Override
     public Page<Team> getAll(Pageable pageable) {
         return teamRepository.findAll(pageable);
+    }
+
+    /**
+     * met a jour les jour d'une équipe
+     * @param form formulaire de mise a jour
+     * @param id de l'équipe a mettre a jour
+     * @param authentication afin de vérifier que l'utilisateur connecté est bien soit capitaine soit admin
+     */
+    @Override
+    public void update(TeamForm form, long id, Authentication authentication) {
+        if (form == null) throw new IllegalArgumentException("le formulaire ne peut etre null");
+        Team teamToUpdate = getOne(id);
+        User userConnected = userRepository.findByUsername(authentication.getName()).orElseThrow(()-> new UsernameNotFoundException("utilisateur pas trouvé"));
+        //TODO ajouter la possibilité a l'admin de changer le nom de l'équipe si contraire a LA NETIQUETTE
+        if (!userConnected.equals(teamToUpdate.getCaptain()) && !userConnected.getUserRoles().contains(UserRole.ADMIN)) throw  new BadCredentialsException("l'utilisateur connecté ne peut modifier cette équipe");
+        teamToUpdate.setCaptain(userService.getOne(form.Captainid()));
+        teamToUpdate.setPlayerList(form.playerListId().stream()
+                .map(userService::getOne)
+                .toList());
+        teamRepository.save(teamToUpdate);
     }
 }

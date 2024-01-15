@@ -52,4 +52,16 @@ public class TeamController {
     public ResponseEntity<Page<TeamShortDto>> getAll(Pageable pageable){
         return ResponseEntity.ok(teamService.getAll(pageable).map(TeamShortDto::fromEntity));
     }
+
+    /**
+     * controller de l'update d'une équipe
+     * @param id de l'équipe a mettre a jour
+     * @param form nouvelles données de l'équipe
+     * @param authentication utilisateur connecté
+     */
+    @PreAuthorize("isAuthenticated()")
+    @PutMapping("/{id}")
+    public void update(@PathVariable long id, @RequestBody TeamForm form, Authentication authentication){
+        teamService.update(form,id,authentication);
+    }
 }

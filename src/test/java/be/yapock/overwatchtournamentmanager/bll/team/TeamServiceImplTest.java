@@ -3,6 +3,7 @@ package be.yapock.overwatchtournamentmanager.bll.team;
 import be.yapock.overwatchtournamentmanager.bll.user.UserService;
 import be.yapock.overwatchtournamentmanager.dal.models.Team;
 import be.yapock.overwatchtournamentmanager.dal.models.User;
+import be.yapock.overwatchtournamentmanager.dal.models.enums.UserRole;
 import be.yapock.overwatchtournamentmanager.dal.repositories.TeamRepository;
 import be.yapock.overwatchtournamentmanager.dal.repositories.UserRepository;
 import be.yapock.overwatchtournamentmanager.pl.models.team.forms.TeamForm;
@@ -15,7 +16,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -45,6 +48,9 @@ class TeamServiceImplTest {
 
     @BeforeEach
     void setUp(){
+        userConnected = User.builder()
+            .isEnabled(true)
+            .build();
         List<Long> playerIds = new ArrayList<>();
         user= User.builder()
                 .isEnabled(true)
@@ -53,9 +59,7 @@ class TeamServiceImplTest {
         players.add(user);
         form = new TeamForm("username", 1200,2L,playerIds);
         entity = new Team(1L, LocalDate.now(),form.teamName(), form.teamElo(), userConnected, players);
-        userConnected = User.builder()
-                .isEnabled(true)
-                .build();
+
     }
 
     @Test
@@ -124,5 +128,67 @@ class TeamServiceImplTest {
         Page result = teamService.getAll(pageable);
 
         assertEquals(entities,result);
+    }
+
+    @Test
+    void update_when_ok_Admin(){
+        userConnected.setUserRoles(Collections.singletonList(UserRole.ADMIN));
+        when(userRepository.findByUsername(any())).thenReturn(Optional.of(userConnected));
+        when(teamRepository.save(any())).thenReturn(entity);
+        when(teamRepository.findById(anyLong())).thenReturn(Optional.of(entity));
+
+        teamService.update(form, anyLong(), authentication);
+
+        verify(teamRepository, times(1)).save(any(Team.class));
+    }
+
+    @Test
+    void update_when_ok_Captain(){
+        userConnected.setUserRoles(Collections.singletonList(UserRole.PLAYER));
+        when(userRepository.findByUsername(any())).thenReturn(Optional.of(userConnected));
+        when(teamRepository.save(any())).thenReturn(entity);
+        when(teamRepository.findById(anyLong())).thenReturn(Optional.of(entity));
+
+        teamService.update(form, anyLong(), authentication);
+
+        verify(teamRepository, times(1)).save(any(Team.class));
+    }
+
+    @Test
+    void update_when_kO_form_null(){
+        Exception exception = assertThrows(IllegalArgumentException.class, ()-> teamService.update(null, 1L, authentication));
+
+        String expectedMessage = "le formulaire ne peut etre null";
+        String actualMessage = exception.getMessage();
+
+        assertEquals(expectedMessage, actualMessage);
+    }
+
+    @Test
+    void update_when_ko_username_not_found(){
+        when(userRepository.findByUsername(any())).thenReturn(Optional.empty());
+        when(teamRepository.findById(anyLong())).thenReturn(Optional.of(entity));
+
+        Exception exception = assertThrows(UsernameNotFoundException.class, () -> teamService.update(form, 1L, authentication));
+
+        String expectedMessage = "utilisateur pas trouvé";
+        String actualMessage = exception.getMessage();
+
+        assertEquals(expectedMessage, actualMessage);
+    }
+
+    @Test
+    void update_when_ko_unauthorize(){
+        userConnected.setUserRoles(Collections.singletonList(UserRole.PLAYER));
+        entity.setCaptain(user);
+
+        when(userRepository.findByUsername((any()))).thenReturn(Optional.of(userConnected));
+        when(teamRepository.findById(anyLong())).thenReturn(Optional.of(entity));
+
+        Exception exception = assertThrows(BadCredentialsException.class, () -> teamService.update(form, 1L, authentication));
+
+        String expectedMessage = "l'utilisateur connecté ne peut modifier cette équipe";
+
+        assertEquals(expectedMessage, exception.getMessage());
     }
 }

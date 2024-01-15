@@ -10,4 +10,5 @@ public interface TeamService {
     void create(TeamForm form, Authentication authentication);
     Team getOne(long id);
     Page<Team> getAll(Pageable pageable);
+    void update(TeamForm form, long id, Authentication authentication);
 }
