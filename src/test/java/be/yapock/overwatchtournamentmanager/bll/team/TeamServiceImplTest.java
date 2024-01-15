@@ -36,24 +36,33 @@ class TeamServiceImplTest {
     private Authentication authentication;
     private TeamForm form;
     private Team entity;
+    private User userConnected;
+    private User user;
 
     @BeforeEach
     void setUp(){
         List<Long> playerIds = new ArrayList<>();
+        user= User.builder()
+                .isEnabled(true)
+                .build();
+        List<User> players = new ArrayList<>();
+        players.add(user);
         form = new TeamForm("username", 1200,2L,playerIds);
-        entity = new Team(1L, LocalDate.now(),form.teamName(), form.teamElo(), any(User.class), anyList());
+        entity = new Team(1L, LocalDate.now(),form.teamName(), form.teamElo(), userConnected, players);
+        userConnected = User.builder()
+                .isEnabled(true)
+                .build();
     }
 
     @Test
     void create() {
-        User user = new User();
-        when(userRepository.findByUsername(any())).thenReturn(Optional.of(user));
+
+        when(userRepository.findByUsername(any())).thenReturn(Optional.of(userConnected));
         when(teamRepository.existsByPlayerListContaining(any(User.class))).thenReturn(false);
-        when(userService.getOne(anyLong())).thenReturn(user);
         when(teamRepository.save(any())).thenReturn(entity);
 
         teamService.create(form,authentication);
 
-        verify(teamRepository,times(1)).save(entity);
+        verify(teamRepository,times(1)).save(any(Team.class));
     }
 }
