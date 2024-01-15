@@ -48,11 +48,20 @@ public class TournamentServiceImpl implements TournamentService{
                 .build();
         teamRepository.findAllByAllWomenAndTeamEloBetween(tournament.isWomenOnly(), tournament.getMinElo(), tournament.getMaxElo()).stream().forEach(e-> {
             try {
-                emailService.sendInvititionalMail(e);
+                emailService.sendInvititionalMail(e, tournament);
             } catch (MessagingException ex) {
                 throw new RuntimeException(ex);
             }
         });
         tournamentRepository.save(tournament);
+    }
+
+    /**
+     * methode de suppression de tournoi
+     * @param id du tournoi supprimer
+     */
+    @Override
+    public void delete(long id) {
+        tournamentRepository.deleteById(id);
     }
 }

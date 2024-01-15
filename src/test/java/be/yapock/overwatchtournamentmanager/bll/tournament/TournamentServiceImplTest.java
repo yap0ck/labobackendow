@@ -6,7 +6,7 @@ import be.yapock.overwatchtournamentmanager.dal.models.enums.TournamentStatus;
 import be.yapock.overwatchtournamentmanager.dal.repositories.TeamRepository;
 import be.yapock.overwatchtournamentmanager.dal.repositories.TournamentRepository;
 import be.yapock.overwatchtournamentmanager.pl.models.tournament.forms.TournamentForm;
-import jakarta.persistence.Entity;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -67,5 +67,12 @@ class TournamentServiceImplTest {
         String expectedMessage = "le formulaire ne peut etre vide";
 
         assertEquals(expectedMessage,exception.getMessage());
+    }
+
+    @Test
+    void delete_when_ok(){
+        tournamentService.delete(1L);
+
+        verify(tournamentRepository,times(1)).deleteById(anyLong());
     }
 }

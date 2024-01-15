@@ -7,4 +7,5 @@ import org.springframework.stereotype.Service;
 @Service
 public interface TournamentService {
     void create(TournamentForm form);
+    void delete(long id);
 }

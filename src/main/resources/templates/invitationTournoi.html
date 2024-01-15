@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<html xmlns:th="http://www.thymeleaf.org" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>Invitation</title>
+    <style>
+        body{
+            box-sizing: border-box;
+            margin: 0;
+
+        }
+        .header{
+            display: flex;
+            padding: 2%;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+            background-color: #218ffe;
+            color: #f99e1a;
+        }
+        .logoleft{
+            display: flex;
+            flex-direction: row;
+            justify-content: flex-end;
+        }
+        img{
+            width: 50%;
+            height: 100%;
+        }
+        .logoright{
+            display: flex;
+            flex-direction: row;
+            justify-content: flex-start;
+        }
+        h1{
+            margin: 0 2%;
+        }
+        .button-container {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .login-button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #000000;
+            color: #f99e1a;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+        .message{
+            background-color: #43484c;
+            text-align: center;
+            margin-top: 0;
+            color: #f99e1a;
+        }
+        p{
+            color: #f99e1a;
+        }
+    </style>
+</head>
+<body>
+<div class="header">
+    <div class="logoleft">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/55/Overwatch_circle_logo.svg/600px-Overwatch_circle_logo.svg.png">
+    </div>
+    <h1>Overwatch Tournament Manager</h1>
+    <div class="logoright">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/55/Overwatch_circle_logo.svg/600px-Overwatch_circle_logo.svg.png">
+    </div>
+</div>
+<div class="message">
+    <br>
+    <br>
+    <br>
+    <p th:text="${'Cher ' + username}"/>
+    <p th:text="${'Nous avons le plaisir de vous informer que votre équipe ' + team_name + ' est élligible pour s\'inscrire au tournoi:'}"/>
+    <p th:text="${tournamentName + ' qui se tiendra le ' + starting_time}"/>
+    <p>
+        Pour vous inscrire, veuillez cliquez sur le lien ci-dessous:
+    </p>
+    <div class="button-container">
+        <a class="login-button" href="http://localhost:8081/swagger-ui/index.html#/tournament">Connexion</a>
+    </div>
+    <br>
+    <p><br><br>
+        Cordialement,<br>
+        L'équipe de support Overwatch Tournament Manager</p>
+</div>
+
+</body>
+</html>
