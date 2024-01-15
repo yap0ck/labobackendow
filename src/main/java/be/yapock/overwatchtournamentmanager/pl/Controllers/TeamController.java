@@ -4,6 +4,7 @@ import be.yapock.overwatchtournamentmanager.bll.team.TeamService;
 import be.yapock.overwatchtournamentmanager.pl.models.team.dtos.TeamFullDTO;
 import be.yapock.overwatchtournamentmanager.pl.models.team.dtos.TeamShortDto;
 import be.yapock.overwatchtournamentmanager.pl.models.team.forms.TeamForm;
+import be.yapock.overwatchtournamentmanager.pl.models.team.forms.TeamSearchForm;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -63,5 +64,27 @@ public class TeamController {
     @PutMapping("/{id}")
     public void update(@PathVariable long id, @RequestBody TeamForm form, Authentication authentication){
         teamService.update(form,id,authentication);
+    }
+
+    /**
+     * Controller du delete d'une équipe
+     * @param id de l'équipe à supprimer
+     * @param authentication ustilisateur connecté
+     */
+    @PreAuthorize("isAuthenticated()")
+    @DeleteMapping("/{id}")
+    public void  delete(@PathVariable long id, Authentication authentication){
+        teamService.delete(id, authentication);
+    }
+
+    /**
+     * Controller appelant la fonction de recherche par spécification
+     * @param form formulaire de recherche
+     * @param pageable parametres de pagination
+     * @return une page de team en short dto
+     */
+    @GetMapping("/search")
+    public ResponseEntity<Page<TeamShortDto>> getAllBySpec(@RequestBody TeamSearchForm form, Pageable pageable){
+        return ResponseEntity.ok(teamService.getAllBySpec(form, pageable).map(TeamShortDto::fromEntity));
     }
 }

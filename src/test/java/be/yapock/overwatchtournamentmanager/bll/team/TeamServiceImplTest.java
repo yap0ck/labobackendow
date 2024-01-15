@@ -7,6 +7,7 @@ import be.yapock.overwatchtournamentmanager.dal.models.enums.UserRole;
 import be.yapock.overwatchtournamentmanager.dal.repositories.TeamRepository;
 import be.yapock.overwatchtournamentmanager.dal.repositories.UserRepository;
 import be.yapock.overwatchtournamentmanager.pl.models.team.forms.TeamForm;
+import be.yapock.overwatchtournamentmanager.pl.models.team.forms.TeamSearchForm;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,6 +17,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -190,5 +192,55 @@ class TeamServiceImplTest {
         String expectedMessage = "l'utilisateur connecté ne peut modifier cette équipe";
 
         assertEquals(expectedMessage, exception.getMessage());
+    }
+
+    @Test
+    void delete_when_ok_admin(){
+        userConnected.setUserRoles(Collections.singletonList(UserRole.ADMIN));
+        when(userRepository.findByUsername(any())).thenReturn(Optional.of(userConnected));
+        when(teamRepository.findById(anyLong())).thenReturn(Optional.of(entity));
+
+        teamService.delete(1L, authentication);
+
+        verify(teamRepository, times(1)).delete(any(Team.class));
+    }
+
+    @Test
+    void delete_when_ok_captain(){
+        userConnected.setUserRoles(Collections.singletonList(UserRole.PLAYER));
+        when(userRepository.findByUsername(any())).thenReturn(Optional.of(userConnected));
+        when(teamRepository.findById(anyLong())).thenReturn(Optional.of(entity));
+
+        teamService.delete(1L,authentication);
+
+        verify(teamRepository, times(1)).delete(any(Team.class));
+    }
+
+    @Test
+    void delete_when_ko_unauthorized(){
+        userConnected.setUserRoles(Collections.singletonList(UserRole.PLAYER));
+        entity.setCaptain(user);
+
+        when(userRepository.findByUsername((any()))).thenReturn(Optional.of(userConnected));
+        when(teamRepository.findById(anyLong())).thenReturn(Optional.of(entity));
+
+        Exception exception = assertThrows(BadCredentialsException.class, () -> teamService.update(form, 1L, authentication));
+
+        String expectedMessage = "l'utilisateur connecté ne peut modifier cette équipe";
+
+        assertEquals(expectedMessage, exception.getMessage());
+    }
+
+    @Test
+    void getAllBySpec(){
+        TeamSearchForm teamSearchForm = mock(TeamSearchForm.class);
+        Pageable pageable = mock(Pageable.class);
+        Page entities= mock(Page.class);
+
+        when(teamRepository.findAll(any(Specification.class), eq(pageable))).thenReturn(entities);
+
+        Page<Team> result = teamService.getAllBySpec(teamSearchForm, pageable);
+
+        assertEquals(entities,result);
     }
 }

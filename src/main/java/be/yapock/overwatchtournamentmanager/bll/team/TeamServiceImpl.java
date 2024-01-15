@@ -7,15 +7,20 @@ import be.yapock.overwatchtournamentmanager.dal.models.enums.UserRole;
 import be.yapock.overwatchtournamentmanager.dal.repositories.TeamRepository;
 import be.yapock.overwatchtournamentmanager.dal.repositories.UserRepository;
 import be.yapock.overwatchtournamentmanager.pl.models.team.forms.TeamForm;
+import be.yapock.overwatchtournamentmanager.pl.models.team.forms.TeamSearchForm;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -91,4 +96,50 @@ public class TeamServiceImpl implements TeamService {
                 .toList());
         teamRepository.save(teamToUpdate);
     }
+
+    /**
+     * supprime une équipe
+     * @param id de l'équipe a supprimé
+     * @param authentication afin de vérifier si l'utilisateur connecté a les droit de supprimé cet équipe
+     */
+    //TODO retirer la suppression dure et ajouté un booléen "isDeleted"
+    @Override
+    public void delete(long id, Authentication authentication) {
+        Team teamDelete = getOne(id);
+        User userConnected = userRepository.findByUsername(authentication.getName()).orElseThrow(()-> new UsernameNotFoundException("utilisateur pas trouvé"));
+        if (!userConnected.equals(teamDelete.getCaptain()) && !userConnected.getUserRoles().contains(UserRole.ADMIN)) throw  new BadCredentialsException("l'utilisateur connecté ne peut modifier cette équipe");
+        teamRepository.delete(teamDelete);
+    }
+
+    /**
+     * effectue une recherche par spécification
+     * @param form formulaire de recherche
+     * @param pageable parametres de pagination
+     * @return une page contenant les équipes recherchée depuis le formulaire
+     */
+    @Override
+    public Page<Team> getAllBySpec(TeamSearchForm form, Pageable pageable) {
+        Specification<Team> spec = createSpecification(form);
+        return teamRepository.findAll(spec, pageable );
+    }
+
+    /**
+     * mise en place des spécifications pour la recherche par spec, les champs sont nom, capitaine id et joueur id
+     * @param form formulaire de recherche
+     * @return lis de spécifications
+     */
+    private Specification<Team> createSpecification(TeamSearchForm form){
+        return (((root, query, criteriaBuilder) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            if (form.name()!= null) predicates.add(criteriaBuilder.like(root.get("team_name"), "%" + form.name() + "%"));
+            if (form.captainId()!= null) predicates.add(criteriaBuilder.equal(root.get("captain_id"), form.captainId()));
+            if (form.playerId()!=null) {
+                Join<Team, User> userJoin = root.join("playerList");
+                predicates.add(criteriaBuilder.equal(userJoin.get("user_id"),form.playerId()));
+            }
+            return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+        }));
+    }
+
+
 }
