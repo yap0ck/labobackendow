@@ -6,6 +6,9 @@ import be.yapock.overwatchtournamentmanager.dal.models.User;
 import be.yapock.overwatchtournamentmanager.dal.repositories.TeamRepository;
 import be.yapock.overwatchtournamentmanager.dal.repositories.UserRepository;
 import be.yapock.overwatchtournamentmanager.pl.models.team.forms.TeamForm;
+import jakarta.persistence.EntityNotFoundException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -44,5 +47,26 @@ public class TeamServiceImpl implements TeamService {
                         .toList())
                 .build();
         teamRepository.save(team);
+    }
+
+    /**
+     * recherche une équipe par sont id
+     * @throws EntityNotFoundException si il n'y a pas d'équipe portant l'id
+     * @param id de l'équipe recherchée
+     * @return Team
+     */
+    @Override
+    public Team getOne(long id) {
+        return teamRepository.findById(id).orElseThrow(()-> new EntityNotFoundException("équipe pas trouvée"));
+    }
+
+    /**
+     * affiche toute les équipes sous forme de Page
+     * @param pageable parametre de pagination
+     * @return page d'équipe
+     */
+    @Override
+    public Page<Team> getAll(Pageable pageable) {
+        return teamRepository.findAll(pageable);
     }
 }
