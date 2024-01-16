@@ -24,30 +24,33 @@ public class TournamentController {
 
     /**
      * controller appelant la création de tournoi, seul les admin peuvent creer un tournoi
+     *
      * @param form formulaire de création de tournoi
      */
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping
-    public void create(@RequestBody TournamentForm form){
+    public void create(@RequestBody TournamentForm form) {
         tournamentService.create(form);
     }
 
     /**
      * controller appelant la suppression d'un tournoi, seul les admin y ont accés
+     *
      * @param id du tournoi a supprimer
      */
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable long id){
+    public void delete(@PathVariable long id) {
         tournamentService.delete(id);
     }
 
     /**
      * controller appellant la liste des 10derniers tournoi
+     *
      * @return lis de tournois sous forme de DTO
      */
     @GetMapping
-    public ResponseEntity<List<TournamentDTO>> getAll(){
+    public ResponseEntity<List<TournamentDTO>> getAll() {
         return ResponseEntity.ok(tournamentService.getAll().stream()
                 .map(TournamentDTO::fromEntity)
                 .toList());
@@ -55,35 +58,49 @@ public class TournamentController {
 
     /**
      * controller appelant la recherche par spécificité
-     * @param form formulaire de recherche
-     * @param pageable parametre d'affichage
+     *
+     * @param form           formulaire de recherche
+     * @param pageable       parametre d'affichage
      * @param authentication utilisateur connecté
      * @return page de tournois correspondant aux spécificité de la recherche
      */
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/search")
-    public ResponseEntity<Page<TournamentDTO>> getAllBySpec(@RequestBody TournamentSearchForm form, Pageable pageable, Authentication authentication){
-        return ResponseEntity.ok(tournamentService.getAllBySpec(form,pageable,authentication).map(TournamentDTO::fromEntity));
+    public ResponseEntity<Page<TournamentDTO>> getAllBySpec(@RequestBody TournamentSearchForm form, Pageable pageable, Authentication authentication) {
+        return ResponseEntity.ok(tournamentService.getAllBySpec(form, pageable, authentication).map(TournamentDTO::fromEntity));
     }
 
     /**
      * Controller appelant la recherche par id
+     *
      * @param id du tournoi recherché
      * @return un tournoi sous sa forme dto
      */
     @GetMapping("/{id}")
-    public ResponseEntity<TournamentDTOWithTeams> getOne(@PathVariable long id){
+    public ResponseEntity<TournamentDTOWithTeams> getOne(@PathVariable long id) {
         return ResponseEntity.ok(tournamentService.getOne(id));
     }
 
     /**
      * controller appelant l'enregistrement d'une équipe a un tournoi
-     * @param id du tournoi
+     *
+     * @param id             du tournoi
      * @param authentication utilisateur connecté
      */
     @PreAuthorize("isAuthenticated()")
     @PostMapping("/register/{id}")
-    public void register(@PathVariable long id, Authentication authentication){
-        tournamentService.register(id,authentication);
+    public void register(@PathVariable long id, Authentication authentication) {
+        tournamentService.register(id, authentication);
+    }
+
+    /**
+     * controller appelant la methode de suppression d'enregistrement à un tournoi
+     * @param id du tournoi
+     * @param authentication pour récupérer l'équipe de l'utilisateur
+     */
+    @PreAuthorize("isAuthenticated()")
+    @DeleteMapping("/unregister/{id}")
+    public void unregister(@PathVariable long id, Authentication authentication){
+        tournamentService.unregister(id, authentication);
     }
 }

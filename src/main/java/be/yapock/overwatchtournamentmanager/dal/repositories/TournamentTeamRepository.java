@@ -11,5 +11,6 @@ import java.util.List;
 public interface TournamentTeamRepository extends JpaRepository<TournamentTeams, TournamentTeamCompositeKey> {
     int countAllByTournament(Tournament tournament);
     List<TournamentTeams> findAllByTournament(Tournament tournament);
+    void deleteByTeamAndTournament(Team team, Tournament tournament);
     boolean existsByTeamAndTournament(Team team, Tournament tournament);
 }

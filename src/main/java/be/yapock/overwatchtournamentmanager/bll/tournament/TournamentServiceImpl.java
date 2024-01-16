@@ -171,6 +171,20 @@ public class TournamentServiceImpl implements TournamentService{
     }
 
     /**
+     * Methode permettant le désenregistrement d'une équipe à un tournoi par le capitaine
+     * @param id du tournoi
+     * @param authentication utilisateur connecté
+     */
+    @Override
+    public void unregister(long id, Authentication authentication) {
+        User userConnected = userRepository.findByUsername(authentication.getName()).orElseThrow(()->new UsernameNotFoundException("utilisateur pas trouvé"));
+        Team team = teamRepository.findByCaptain(userConnected).orElseThrow(()->new EntityNotFoundException("équipe pas trouvée"));
+        Tournament tournament = tournamentRepository.findById(id).orElseThrow(()->new EntityNotFoundException("tournoi pas trouvé"));
+        if (!tournament.getStatus().equals(TournamentStatus.REGISTRATION) || !tournamentTeamRepository.existsByTeamAndTournament(team,tournament)) throw new IllegalArgumentException("condition non respectée");
+        tournamentTeamRepository.deleteByTeamAndTournament(team,tournament);
+    }
+
+    /**
      * Spécification de la recherche par spec. si l'option canRegister est true, recherche les tournoi dans lesquels l'équipe peut s'enregistrer.
      * Si l'option isRegistered est true, renvoye les predicats dans lesquels les tournoi auxquels l'équipe est inscrite
      * @param form formulaire de recherche

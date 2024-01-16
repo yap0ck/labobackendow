@@ -21,4 +21,5 @@ public interface TournamentService {
     TournamentDTOWithTeams getOne(long id);
     List<Tournament> getAll();
     Page<Tournament> getAllBySpec(TournamentSearchForm form, Pageable pageable, Authentication authentication);
+    void unregister(long id, Authentication authentication);
 }

@@ -365,4 +365,85 @@ class TournamentServiceImplTest {
 
         assertEquals(expectedMessage,exception.getMessage());
     }
+
+    @Test
+    void unregister_when_ok(){
+        when(userRepository.findByUsername(any())).thenReturn(Optional.of(user));
+        when(teamRepository.findByCaptain(any(User.class))).thenReturn(Optional.of(team));
+        when(tournamentRepository.findById(anyLong())).thenReturn(Optional.of(entity));
+
+        entity.setStatus(TournamentStatus.REGISTRATION);
+        when(tournamentTeamRepository.existsByTeamAndTournament(team,entity)).thenReturn(true);
+
+        tournamentService.unregister(1L,authentication);
+
+        verify(tournamentTeamRepository,times(1)).deleteByTeamAndTournament(any(Team.class),any(Tournament.class));
+    }
+
+    @Test
+    void unregister_when_ko_userNotFound(){
+        when(userRepository.findByUsername(any())).thenReturn(Optional.empty());
+
+        Exception exception = assertThrows(UsernameNotFoundException.class, ()->tournamentService.unregister(1L,authentication));
+
+        String expectedMessage = "utilisateur pas trouvé";
+
+        assertEquals(expectedMessage, exception.getMessage());
+    }
+
+    @Test
+    void unregister_when_ko_teamNotFound(){
+        when(userRepository.findByUsername(any())).thenReturn(Optional.of(user));
+        when(teamRepository.findByCaptain(any(User.class))).thenReturn(Optional.empty());
+
+        Exception exception = assertThrows(EntityNotFoundException.class, ()-> tournamentService.unregister(1L,authentication));
+
+        String expectedMessage = "équipe pas trouvée";
+
+        assertEquals(expectedMessage, exception.getMessage());
+    }
+
+    @Test
+    void unregister_when_ko_tournamentNotFound(){
+        when(userRepository.findByUsername(any())).thenReturn(Optional.of(user));
+        when(teamRepository.findByCaptain(any(User.class))).thenReturn(Optional.of(team));
+        when(tournamentRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+        Exception exception = assertThrows(EntityNotFoundException.class, ()-> tournamentService.unregister(1L,authentication));
+
+        String expectedMessage = "tournoi pas trouvé";
+
+        assertEquals(expectedMessage, exception.getMessage());
+    }
+
+    @Test
+    void unregister_when_ko_tournamentStatusNotRegistration(){
+        when(userRepository.findByUsername(any())).thenReturn(Optional.of(user));
+        when(teamRepository.findByCaptain(any(User.class))).thenReturn(Optional.of(team));
+        when(tournamentRepository.findById(anyLong())).thenReturn(Optional.of(entity));
+
+        entity.setStatus(TournamentStatus.IN_PROGRESS);
+
+        Exception exception = assertThrows(IllegalArgumentException.class, ()-> tournamentService.unregister(1L,authentication));
+
+        String expectedMessage = "condition non respectée";
+
+        assertEquals(expectedMessage, exception.getMessage());
+    }
+
+    @Test
+    void unregister_when_ko_notregistered(){
+        when(userRepository.findByUsername(any())).thenReturn(Optional.of(user));
+        when(teamRepository.findByCaptain(any(User.class))).thenReturn(Optional.of(team));
+        when(tournamentRepository.findById(anyLong())).thenReturn(Optional.of(entity));
+
+        entity.setStatus(TournamentStatus.REGISTRATION);
+        when(tournamentTeamRepository.existsByTeamAndTournament(team,entity)).thenReturn(false);
+
+        Exception exception = assertThrows(IllegalArgumentException.class, ()-> tournamentService.unregister(1L,authentication));
+
+        String expectedMessage = "condition non respectée";
+
+        assertEquals(expectedMessage, exception.getMessage());
+    }
 }
