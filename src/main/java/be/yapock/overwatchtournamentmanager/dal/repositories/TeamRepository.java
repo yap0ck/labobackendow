@@ -13,4 +13,5 @@ import java.util.Optional;
 public interface TeamRepository extends JpaRepository<Team, Long>, JpaSpecificationExecutor<Team> {
     boolean existsByPlayerListContaining(User user);
     List<Team> findAllByAllWomenAndTeamEloBetween(boolean iswomen, int eloMin, int eloMax);
+    Optional<Team> findByCaptain(User user);
 }

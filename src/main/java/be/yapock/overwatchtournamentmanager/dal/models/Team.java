@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -32,4 +33,15 @@ public class Team {
     private List<User> playerList;
     @Getter @Setter
     private boolean isAllWomen;
+
+    @ManyToMany(mappedBy = "teams")
+    private List<Tournament> tournaments = new ArrayList<>();
+
+    public List<Tournament> getTournaments() {
+        return tournaments;
+    }
+
+    public void setTournaments(List<Tournament> tournaments) {
+        this.tournaments = tournaments;
+    }
 }

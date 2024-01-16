@@ -8,6 +8,7 @@ import lombok.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -44,4 +45,6 @@ public class Tournament {
     private LocalDate creationDate;
     @Getter @Setter
     private LocalDate updateDate;
+    @Getter @Setter
+    private int registrationNbr;
 }
