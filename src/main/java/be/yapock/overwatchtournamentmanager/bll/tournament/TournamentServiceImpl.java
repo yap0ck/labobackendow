@@ -11,6 +11,7 @@ import be.yapock.overwatchtournamentmanager.dal.repositories.TournamentRepositor
 import be.yapock.overwatchtournamentmanager.dal.repositories.TournamentTeamRepository;
 import be.yapock.overwatchtournamentmanager.dal.repositories.UserRepository;
 import be.yapock.overwatchtournamentmanager.pl.models.team.forms.TeamSearchForm;
+import be.yapock.overwatchtournamentmanager.pl.models.tournament.dtos.TournamentDTOWithTeams;
 import be.yapock.overwatchtournamentmanager.pl.models.tournament.forms.TournamentForm;
 import be.yapock.overwatchtournamentmanager.pl.models.tournament.forms.TournamentSearchForm;
 import jakarta.mail.MessagingException;
@@ -26,6 +27,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -113,21 +115,68 @@ public class TournamentServiceImpl implements TournamentService{
         return tournamentRepository.findAll(spec, pageable);
     }
 
+    /**
+     * recherche d'un tournoi par son id
+     * @param id du tournoi recherché
+     * @return une entité tournoi
+     */
     @Override
-    public Tournament getOne(long id){
-        return null;
+    public TournamentDTOWithTeams getOne(long id){
+        Tournament tournament = tournamentRepository.findById(id).orElseThrow(()-> new EntityNotFoundException("tournoi pas trouvé"));
+        List<Long> teamsId = tournamentTeamRepository.findAllByTournament(tournament).stream()
+                .map(e -> e.getTeam().getId())
+                .toList();
+        return TournamentDTOWithTeams.fromEntity(tournament,teamsId);
     }
 
+    /**
+     * methode permettant a un capitaine d'inscrire son équipe a un tournoi si son équipe correspond aux condition du tournoi.
+     * Conditions: ▪ Si un tournoi n’a pas encore commencé.
+     * ▪ Si la date de fin des inscriptions n’est pas dépassée
+     * ▪ Si le joueur n’est pas déjà inscrit
+     * ▪ Si un tournoi n’a pas atteint le nombre maximum de participants
+     * ▪ Si son ELO, l’y autorise
+     * L’ELO du joueur doit <= à l’ELO max (si renseigné)
+     * L’ELO du joueur doit >= à l’ELO min (si renseigné)
+     * ▪ Si son genre l’y autorise
+     * Seuls les joueurs (fille et autre) peuvent s’inscrire à un tournoi
+     * « WomenOnly »
+     * @param id du tournoi
+     * @param authentication utilisateur connecté
+     */
     @Override
     public void register(long id, Authentication authentication) {
         User userConnected = userRepository.findByUsername(authentication.getName()).orElseThrow(()->new UsernameNotFoundException("utilisateur pas trouvé"));
         Team team = teamRepository.findByCaptain(userConnected).orElseThrow(()->new EntityNotFoundException("équipe pas trouvée"));
+        Tournament tournament = tournamentRepository.findById(id).orElseThrow(()-> new EntityNotFoundException("tournoi pas trouvé"));
+
+        if (!tournament.getStatus().equals(TournamentStatus.REGISTRATION) ||
+                tournament.getStartingDateTime().minusHours(1).isBefore(LocalDateTime.now()) ||
+                tournamentTeamRepository.existsByTeamAndTournament(team,tournament) ||
+                tournamentTeamRepository.countAllByTournament(tournament)>= tournament.getMaxTeam() ||
+                team.getTeamElo() < tournament.getMinElo() ||
+                team.getTeamElo() > tournament.getMaxElo()) {
+            if (tournament.isWomenOnly()&& !team.isAllWomen()) {
+                throw new IllegalArgumentException("conditions d'inscription non respectée");
+            } else throw new IllegalArgumentException("conditions d'inscription non respectée");
+        }
+
         TournamentTeams registration = TournamentTeams.builder()
                 .registrationDate(LocalDate.now())
-                .tournament(getOne(id))
+                .tournament(tournament)
+                .team(team)
                 .build();
+
+        tournamentTeamRepository.save(registration);
     }
 
+    /**
+     * Spécification de la recherche par spec. si l'option canRegister est true, recherche les tournoi dans lesquels l'équipe peut s'enregistrer.
+     * Si l'option isRegistered est true, renvoye les predicats dans lesquels les tournoi auxquels l'équipe est inscrite
+     * @param form formulaire de recherche
+     * @param team équipe dont le capitaine est connecté
+     * @return liste de spécification
+     */
     private Specification<Tournament> createSpec(TournamentSearchForm form, Team team){
         return (((root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();

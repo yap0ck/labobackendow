@@ -2,6 +2,7 @@ package be.yapock.overwatchtournamentmanager.pl.Controllers;
 
 import be.yapock.overwatchtournamentmanager.bll.tournament.TournamentService;
 import be.yapock.overwatchtournamentmanager.pl.models.tournament.dtos.TournamentDTO;
+import be.yapock.overwatchtournamentmanager.pl.models.tournament.dtos.TournamentDTOWithTeams;
 import be.yapock.overwatchtournamentmanager.pl.models.tournament.forms.TournamentForm;
 import be.yapock.overwatchtournamentmanager.pl.models.tournament.forms.TournamentSearchForm;
 import org.springframework.data.domain.Page;
@@ -63,5 +64,26 @@ public class TournamentController {
     @GetMapping("/search")
     public ResponseEntity<Page<TournamentDTO>> getAllBySpec(@RequestBody TournamentSearchForm form, Pageable pageable, Authentication authentication){
         return ResponseEntity.ok(tournamentService.getAllBySpec(form,pageable,authentication).map(TournamentDTO::fromEntity));
+    }
+
+    /**
+     * Controller appelant la recherche par id
+     * @param id du tournoi recherché
+     * @return un tournoi sous sa forme dto
+     */
+    @GetMapping("/{id}")
+    public ResponseEntity<TournamentDTOWithTeams> getOne(@PathVariable long id){
+        return ResponseEntity.ok(tournamentService.getOne(id));
+    }
+
+    /**
+     * controller appelant l'enregistrement d'une équipe a un tournoi
+     * @param id du tournoi
+     * @param authentication utilisateur connecté
+     */
+    @PreAuthorize("isAuthenticated()")
+    @PostMapping("/register/{id}")
+    public void register(@PathVariable long id, Authentication authentication){
+        tournamentService.register(id,authentication);
     }
 }

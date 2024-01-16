@@ -12,7 +12,6 @@ import java.time.LocalDate;
 @Builder
 @Data
 @NoArgsConstructor @AllArgsConstructor
-@Table(name = "tournament_team")
 public class TournamentTeams {
     @EmbeddedId
     private TournamentTeamCompositeKey id;
@@ -21,12 +20,12 @@ public class TournamentTeams {
 
     private int matchCount;
 
-    @MapsId("team_id")
+    @MapsId("teamId")
     @ManyToOne
     @JoinColumn(name = "team_id")
     private Team team;
 
-    @MapsId("tournament_id")
+    @MapsId("tournamentId")
     @ManyToOne
     @JoinColumn(name = "tournament_id")
     private Tournament tournament;

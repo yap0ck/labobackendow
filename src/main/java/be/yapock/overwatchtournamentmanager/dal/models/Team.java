@@ -32,16 +32,7 @@ public class Team {
     @Getter @Setter
     private List<User> playerList;
     @Getter @Setter
+    @Column(name = "is_all_women")
     private boolean isAllWomen;
 
-    @ManyToMany(mappedBy = "teams")
-    private List<Tournament> tournaments = new ArrayList<>();
-
-    public List<Tournament> getTournaments() {
-        return tournaments;
-    }
-
-    public void setTournaments(List<Tournament> tournaments) {
-        this.tournaments = tournaments;
-    }
 }
