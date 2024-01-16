@@ -103,4 +103,14 @@ public class TournamentController {
     public void unregister(@PathVariable long id, Authentication authentication){
         tournamentService.unregister(id, authentication);
     }
+
+    /**
+     * Controller pour le début d'un tournoi
+     * @param id tournoi a démarrer
+     */
+    @PreAuthorize("hasRole('ROLE_ADMIN') || hasRole('ROLE_MODERATOR')")
+    @PutMapping("/start/{id}")
+    public void start(@PathVariable long id){
+        tournamentService.start(id);
+    }
 }

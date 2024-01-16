@@ -96,7 +96,7 @@ public class TournamentServiceImpl implements TournamentService{
     @Override
     public List<Tournament> getAll() {
         return tournamentRepository.findFirst10ByStatusOrderByUpdateDateDesc(TournamentStatus.REGISTRATION).stream()
-                .peek(e -> e.setRegistrationNbr(tournamentTeamRepository.countAllByTournament(e)))
+                .peek(e -> e.setRegistrationNbr(tournamentTeamRepository.countByTournament(e)))
                 .toList();
     }
 
@@ -153,7 +153,7 @@ public class TournamentServiceImpl implements TournamentService{
         if (!tournament.getStatus().equals(TournamentStatus.REGISTRATION) ||
                 tournament.getStartingDateTime().minusHours(1).isBefore(LocalDateTime.now()) ||
                 tournamentTeamRepository.existsByTeamAndTournament(team,tournament) ||
-                tournamentTeamRepository.countAllByTournament(tournament)>= tournament.getMaxTeam() ||
+                tournamentTeamRepository.countByTournament(tournament)>= tournament.getMaxTeam() ||
                 team.getTeamElo() < tournament.getMinElo() ||
                 team.getTeamElo() > tournament.getMaxElo()) {
             if (tournament.isWomenOnly()&& !team.isAllWomen()) {
@@ -182,6 +182,21 @@ public class TournamentServiceImpl implements TournamentService{
         Tournament tournament = tournamentRepository.findById(id).orElseThrow(()->new EntityNotFoundException("tournoi pas trouvé"));
         if (!tournament.getStatus().equals(TournamentStatus.REGISTRATION) || !tournamentTeamRepository.existsByTeamAndTournament(team,tournament)) throw new IllegalArgumentException("condition non respectée");
         tournamentTeamRepository.deleteByTeamAndTournament(team,tournament);
+    }
+
+    /**
+     * démarre le tournoi
+     * @param id du tournoi
+     */
+    @Override
+    public void start(long id) {
+        Tournament tournament = tournamentRepository.findById(id).orElseThrow(()->new EntityNotFoundException("tournoi pas trouvé"));
+        if (tournamentTeamRepository.countByTournament(tournament) <= tournament.getMinTeam() || tournament.getStartingDateTime().isBefore(LocalDateTime.now().minusMinutes(5))) throw new IllegalArgumentException("condition non respectée");
+        tournament.setRound(1);
+        tournament.setStatus(TournamentStatus.IN_PROGRESS);
+        tournament.setUpdateDate(LocalDate.now());
+        //TODO générer les matchs
+        tournamentRepository.save(tournament);
     }
 
     /**

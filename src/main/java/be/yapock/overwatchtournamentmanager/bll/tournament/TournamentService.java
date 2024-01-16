@@ -22,4 +22,5 @@ public interface TournamentService {
     List<Tournament> getAll();
     Page<Tournament> getAllBySpec(TournamentSearchForm form, Pageable pageable, Authentication authentication);
     void unregister(long id, Authentication authentication);
+    void start(long id);
 }

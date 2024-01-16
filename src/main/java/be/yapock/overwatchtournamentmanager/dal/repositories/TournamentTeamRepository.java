@@ -9,7 +9,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface TournamentTeamRepository extends JpaRepository<TournamentTeams, TournamentTeamCompositeKey> {
-    int countAllByTournament(Tournament tournament);
+    int countByTournament(Tournament tournament);
     List<TournamentTeams> findAllByTournament(Tournament tournament);
     void deleteByTeamAndTournament(Team team, Tournament tournament);
     boolean existsByTeamAndTournament(Team team, Tournament tournament);

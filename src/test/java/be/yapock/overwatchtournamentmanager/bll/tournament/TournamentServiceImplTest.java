@@ -109,7 +109,7 @@ class TournamentServiceImplTest {
         List<Tournament> entites = new ArrayList<>();
         entites.add(entity);
         when(tournamentRepository.findFirst10ByStatusOrderByUpdateDateDesc(any())).thenReturn(entites);
-        when(tournamentTeamRepository.countAllByTournament(entity)).thenReturn(1);
+        when(tournamentTeamRepository.countByTournament(entity)).thenReturn(1);
 
         List<Tournament> result = tournamentService.getAll();
 
@@ -285,7 +285,7 @@ class TournamentServiceImplTest {
         when(userRepository.findByUsername(any())).thenReturn(Optional.of(user));
         when(teamRepository.findByCaptain(any(User.class))).thenReturn(Optional.of(team));
         when(tournamentRepository.findById(anyLong())).thenReturn(Optional.of(entity));
-        when(tournamentTeamRepository.countAllByTournament(entity)).thenReturn(32);
+        when(tournamentTeamRepository.countByTournament(entity)).thenReturn(32);
 
         entity.setStatus(TournamentStatus.REGISTRATION);
         entity.setStartingDateTime(LocalDateTime.now().plusYears(1));
@@ -445,5 +445,41 @@ class TournamentServiceImplTest {
         String expectedMessage = "condition non respectée";
 
         assertEquals(expectedMessage, exception.getMessage());
+    }
+
+    @Test
+    void start_when_ok(){
+        when(tournamentRepository.findById(anyLong())).thenReturn(Optional.of(entity));
+        when(tournamentTeamRepository.countByTournament(entity)).thenReturn(32);
+
+        tournamentService.start(1L);
+
+        verify(tournamentRepository, times(1)).save(any(Tournament.class));
+    }
+
+    @Test
+    void start_when_ko_tournamentNotFound(){
+        when(tournamentRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+        Exception exception = assertThrows(EntityNotFoundException.class, ()-> tournamentService.start(1L));
+
+        String expectedMessage = "tournoi pas trouvé";
+
+        assertEquals(expectedMessage,exception.getMessage());
+    }
+
+    @Test
+    void start_when_ko_NotEnoughTeam(){
+        entity.setMinTeam(2);
+        when(tournamentRepository.findById(anyLong())).thenReturn(Optional.of(entity));
+        when(tournamentTeamRepository.countByTournament(entity)).thenReturn(0);
+
+
+
+        Exception exception  = assertThrows(IllegalArgumentException.class, ()->tournamentService.start(1L));
+
+        String expectedMessage = "condition non respectée";
+
+        assertEquals(expectedMessage,exception.getMessage());
     }
 }
