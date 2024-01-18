@@ -1,15 +1,13 @@
 package be.yapock.overwatchtournamentmanager.bll.tournament;
 
 import be.yapock.overwatchtournamentmanager.bll.mailing.EmailService;
+import be.yapock.overwatchtournamentmanager.dal.models.Match;
 import be.yapock.overwatchtournamentmanager.dal.models.Team;
 import be.yapock.overwatchtournamentmanager.dal.models.Tournament;
 import be.yapock.overwatchtournamentmanager.dal.models.User;
 import be.yapock.overwatchtournamentmanager.dal.models.enums.TournamentStatus;
 import be.yapock.overwatchtournamentmanager.dal.models.jointable.TournamentTeams;
-import be.yapock.overwatchtournamentmanager.dal.repositories.TeamRepository;
-import be.yapock.overwatchtournamentmanager.dal.repositories.TournamentRepository;
-import be.yapock.overwatchtournamentmanager.dal.repositories.TournamentTeamRepository;
-import be.yapock.overwatchtournamentmanager.dal.repositories.UserRepository;
+import be.yapock.overwatchtournamentmanager.dal.repositories.*;
 import be.yapock.overwatchtournamentmanager.pl.models.team.forms.TeamSearchForm;
 import be.yapock.overwatchtournamentmanager.pl.models.tournament.dtos.TournamentDTOWithTeams;
 import be.yapock.overwatchtournamentmanager.pl.models.tournament.forms.TournamentForm;
@@ -29,7 +27,9 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+
 
 
 @Service
@@ -39,13 +39,15 @@ public class TournamentServiceImpl implements TournamentService{
     private final EmailService emailService;
     private final UserRepository userRepository;
     private final TournamentTeamRepository tournamentTeamRepository;
+    private final MatchRepository matchRepository;
 
-    public TournamentServiceImpl(TournamentRepository tournamentRepository, UserRepository userRepository, TeamRepository teamRepository, EmailService emailService, UserRepository userRepository1, TournamentTeamRepository tournamentTeamRepository) {
+    public TournamentServiceImpl(TournamentRepository tournamentRepository, UserRepository userRepository, TeamRepository teamRepository, EmailService emailService, UserRepository userRepository1, TournamentTeamRepository tournamentTeamRepository, MatchRepository matchRepository) {
         this.tournamentRepository = tournamentRepository;
         this.teamRepository = teamRepository;
         this.emailService = emailService;
         this.userRepository = userRepository1;
         this.tournamentTeamRepository = tournamentTeamRepository;
+        this.matchRepository = matchRepository;
     }
 
     /**
@@ -191,14 +193,57 @@ public class TournamentServiceImpl implements TournamentService{
     @Override
     public void start(long id) {
         Tournament tournament = tournamentRepository.findById(id).orElseThrow(()->new EntityNotFoundException("tournoi pas trouvé"));
-        if (tournamentTeamRepository.countByTournament(tournament) <= tournament.getMinTeam() || tournament.getStartingDateTime().isBefore(LocalDateTime.now().minusMinutes(5))) throw new IllegalArgumentException("condition non respectée");
+        int nbTeam = tournamentTeamRepository.countByTournament(tournament);
+        if ( nbTeam <= tournament.getMinTeam() || tournament.getStartingDateTime().isBefore(LocalDateTime.now().minusMinutes(5))) throw new IllegalArgumentException("condition non respectée");
         tournament.setRound(1);
         tournament.setStatus(TournamentStatus.IN_PROGRESS);
         tournament.setUpdateDate(LocalDate.now());
-        //TODO générer les matchs
+        List<Team> teamList = tournamentTeamRepository.findAllByTournament(tournament).stream()
+                .map(TournamentTeams::getTeam)
+                .sorted(Comparator.comparingInt(Team::getTeamElo).reversed())
+                .toList();
+        List<Team> top = teamList.stream()
+                .filter(e -> teamList.indexOf(e)%2 == 0)
+                .toList();
+        List<Team> bottom = teamList.stream()
+                .filter(e -> teamList.indexOf(e)%2 != 0)
+                .toList();
+
+        List<Match> topMatches = drawMatches(top);
+        List<Match> bottomMatches = drawMatches(bottom);
+
+        List<Match> allMatches = new ArrayList<>();
+        allMatches.addAll(topMatches);
+        allMatches.addAll(bottomMatches);
+
+        allMatches.forEach(e -> e.setMatchNumber(allMatches.indexOf(e)));
+
+        matchRepository.saveAll(allMatches);
+
         tournamentRepository.save(tournament);
     }
 
+    private List<Match> drawMatches(List<Team> teams) {
+        List<Match> matches = new ArrayList<>();
+        while (!teams.isEmpty()) {
+            if (teams.size() % 2 != 0){
+                Match match = Match.builder()
+                        .team1(teams.removeFirst())
+                        .isBye(true)
+                        .currentRound(1)
+                        .build();
+                matches.add(match);
+            }
+            Match match = Match.builder()
+                    .team1(teams.removeFirst())
+                    .team2(teams.removeLast())
+                    .currentRound(1)
+                    .build();
+            matches.add(match);
+
+        }
+        return matches;
+    }
     /**
      * Spécification de la recherche par spec. si l'option canRegister est true, recherche les tournoi dans lesquels l'équipe peut s'enregistrer.
      * Si l'option isRegistered est true, renvoye les predicats dans lesquels les tournoi auxquels l'équipe est inscrite
