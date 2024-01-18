@@ -113,4 +113,12 @@ public class TournamentController {
     public void start(@PathVariable long id){
         tournamentService.start(id);
     }
+
+    /**
+     * controller permettant a un admin ou un modérateur de lancer un tournoi
+     * @param id du tournoi
+     */
+    @PreAuthorize("hasRole('ROLE_ADMIN') || hasRole('ROLE_MODERATOR')")
+    @PutMapping("/nextround/{id}")
+    public void nextRound(@PathVariable long id){tournamentService.nextround(id);}
 }

@@ -9,6 +9,8 @@ import be.yapock.overwatchtournamentmanager.pl.models.match.form.ScoreUpdateForm
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class MatchServiceImpl implements MatchService{
     private final MatchRepository matchRepository;
@@ -31,5 +33,17 @@ public class MatchServiceImpl implements MatchService{
         match.setScoreTeam1(form.scoreTeam1());
         match.setScoreTeam2(form.scoreTeam2());
         matchRepository.save(match);
+    }
+
+    /**
+     * Methode pour retrouver les liste d'un tounroi donné et d'une ronde donnée
+     * @param id du tournoi
+     * @param round ronde
+     * @return liste de match correpsondant aux paramétres
+     */
+    @Override
+    public List<Match> getAllByRound(long id, int round) {
+        Tournament tournament = tournamentRepository.findById(id).orElseThrow(()-> new EntityNotFoundException("tournoi pas trouvé"));
+        return matchRepository.findAllByTournamentAndCurrentRound(tournament,round);
     }
 }

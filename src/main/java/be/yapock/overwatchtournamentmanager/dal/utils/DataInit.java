@@ -21,7 +21,7 @@ public class DataInit implements InitializingBean {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final TeamRepository teamRepository;
-    boolean initialisation=true;
+    boolean initialisation=false;
 
     public DataInit(UserRepository userRepository, PasswordEncoder passwordEncoder, TeamRepository teamRepository) {
         this.userRepository = userRepository;
@@ -31,21 +31,22 @@ public class DataInit implements InitializingBean {
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        Faker fakerFR = Faker.instance(new Locale("fr-FR"));
-        User user = User.builder()
-                .password(passwordEncoder.encode("string"))
-                .gender('M')
-                .email("vagocol930@ziragold.com")
-                .username("string")
-                .userRoles(Collections.singletonList(UserRole.PLAYER))
-                .ranking("Master")
-                .inGameRoles(Collections.singletonList(InGameRole.TANK))
-                .dateOfBirth(LocalDate.now())
-                .battleNet("yapock#2115")
-                .isEnabled(true)
-                .build();
-        userRepository.save(user);
+
         if (initialisation){
+            Faker fakerFR = Faker.instance(new Locale("fr-FR"));
+            User user = User.builder()
+                    .password(passwordEncoder.encode("string"))
+                    .gender('M')
+                    .email("vagocol930@ziragold.com")
+                    .username("string")
+                    .userRoles(Collections.singletonList(UserRole.PLAYER))
+                    .ranking("Master")
+                    .inGameRoles(Collections.singletonList(InGameRole.TANK))
+                    .dateOfBirth(LocalDate.now())
+                    .battleNet("yapock#2115")
+                    .isEnabled(true)
+                    .build();
+            userRepository.save(user);
             for (int i = 0; i < 20; i++) {
                 User user1 = User.builder()
                         .username(fakerFR.overwatch().hero())

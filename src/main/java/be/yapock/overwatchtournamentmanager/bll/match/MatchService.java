@@ -9,4 +9,5 @@ import java.util.List;
 
 public interface MatchService {
     void update(long id, ScoreUpdateForm form);
+    List<Match> getAllByRound(long id, int round);
 }

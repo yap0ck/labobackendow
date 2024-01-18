@@ -87,9 +87,43 @@ public class EmailService {
             mailSender.send(message);
 
         });
+
+
     }
 
+    public void sendTournamentDeletedMail(Team team, Tournament tournament) throws MessagingException {
+        MimeMessage message = mailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message,
+                MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
+                StandardCharsets.UTF_8.name());
+        Map<String, Object> properties = new HashMap<>();
+        properties.put("tournamentName", tournament.getName());
+        properties.put("starting_date", tournament.getStartingDateTime());
+        properties.put("team_name", team.getTeamName());
+        team.getPlayerList().forEach(e-> {
+            properties.put("username", e.getUsername());
+            Mail mail = Mail.builder()
+                    .to(e.getEmail())
+                    .from("playzoneguichet@gmail.com")
+                    .subject("Le tournoi auquel vous étiez inscrit a été annulé")
+                    .mailTemplate(new Mail.MailTemplate("cancelledTournament",properties))
+                    .build();
+            String html = getHtmlContent(mail);
 
+            try {
+                helper.setTo(mail.getTo());
+                helper.setFrom(mail.getFrom());
+                helper.setSubject(mail.getSubject());
+                helper.setText(html,true);
+            } catch (MessagingException ex){
+                throw new RuntimeException(ex);
+            }
+
+
+            mailSender.send(message);
+
+        });
+    }
 
     String getHtmlContent(Mail mail){
         Context context = new Context();

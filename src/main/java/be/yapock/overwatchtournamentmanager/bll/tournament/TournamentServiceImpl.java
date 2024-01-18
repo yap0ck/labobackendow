@@ -88,6 +88,18 @@ public class TournamentServiceImpl implements TournamentService{
      */
     @Override
     public void delete(long id) {
+
+        List<Team> teamList = tournamentTeamRepository.findAllByTournament(tournamentRepository.findById(id).orElseThrow(()-> new EntityNotFoundException("tournoi pas trouvé"))).stream()
+                .map(TournamentTeams::getTeam)
+                .toList();
+        teamList.forEach(e-> {
+            try{
+                emailService.sendTournamentDeletedMail(e, tournamentRepository.findById(id).orElseThrow(()-> new EntityNotFoundException("tournoi pas trouvé")));
+            } catch (MessagingException ex){
+                throw new RuntimeException(ex);
+            }
+                }
+        );
         tournamentRepository.deleteById(id);
     }
 
@@ -209,8 +221,8 @@ public class TournamentServiceImpl implements TournamentService{
                 .filter(e -> teamList.indexOf(e)%2 != 0)
                 .toList();
 
-        List<Match> topMatches = drawMatches(top);
-        List<Match> bottomMatches = drawMatches(bottom);
+        List<Match> topMatches = drawMatches(top, tournament.getRound());
+        List<Match> bottomMatches = drawMatches(bottom, tournament.getRound());
 
         List<Match> allMatches = new ArrayList<>();
         allMatches.addAll(topMatches);
@@ -223,24 +235,90 @@ public class TournamentServiceImpl implements TournamentService{
         tournamentRepository.save(tournament);
     }
 
-    private List<Match> drawMatches(List<Team> teams) {
+    /**
+     * fonction permettant de passer a la ronde suivante pour le tournoi
+     * @param id du tournoi en cours
+     */
+    @Override
+    public void nextround(long id) {
+        Tournament tournament = tournamentRepository.findById(id).orElseThrow(()-> new EntityNotFoundException("tournoi pas trouvé"));
+        List<Match> matchList = matchRepository.findAllByTournament(tournament);
+        if (!matchList.stream().allMatch(match -> match.isBye() || (match.getScoreTeam1() != 0 && match.getScoreTeam2() != 0))) throw new IllegalArgumentException("les matchs ne sont pas terminés");
+        List<Team> teamList = matchList.stream()
+                .sorted(Comparator.comparingLong(Match::getMatchNumber))
+                .map(e -> {
+                    if (e.getScoreTeam1()>e.getScoreTeam2()) {
+                        return e.getTeam1();
+                    } else return e.getTeam2();
+                })
+                .toList();
+        tournament.setRound(tournament.getRound()+1);
+        List<Match> nextRoundMatches = drawNextRoundMatches(teamList, tournament.getRound());
+
+        matchRepository.saveAll(nextRoundMatches);
+
+        tournamentRepository.save(tournament);
+    }
+
+    /**
+     * creer les match des rounds suivant
+     * @param teams liste d'équipe non éliminée
+     * @param currentRound ronde courante
+     * @return liste de match de cette ronde
+     */
+    private List<Match> drawNextRoundMatches(List<Team> teams, int currentRound) {
+        List<Match> matches = new ArrayList<>();
+        while (!teams.isEmpty()) {
+            if (teams.size() % 2 != 0) {
+                Match match = Match.builder()
+                        .team1(teams.removeFirst())
+                        .isBye(true)
+                        .currentRound(currentRound)
+                        .build();
+                matches.add(match);
+            }
+            Match match = Match.builder()
+                    .team1(teams.removeFirst())
+                    .team2(teams.removeFirst())
+                    .currentRound(currentRound)
+                    .build();
+            switch (teams.size()){
+                case 4 -> match.setMaxGame(3);
+                case 2 -> match.setMaxGame(5);
+                default -> match.setMaxGame(1);
+            }
+            matches.add(match);
+        }
+        return matches;
+    }
+    /**
+     * methode permettant la création de match
+     * @param teams liste d'équipe encore présente au tournoi
+     * @param currentRound ronde courrante
+     * @return liste de match
+     */
+    private List<Match> drawMatches(List<Team> teams, int currentRound) {
         List<Match> matches = new ArrayList<>();
         while (!teams.isEmpty()) {
             if (teams.size() % 2 != 0){
                 Match match = Match.builder()
                         .team1(teams.removeFirst())
                         .isBye(true)
-                        .currentRound(1)
+                        .currentRound(currentRound)
                         .build();
                 matches.add(match);
             }
             Match match = Match.builder()
                     .team1(teams.removeFirst())
                     .team2(teams.removeLast())
-                    .currentRound(1)
+                    .currentRound(currentRound)
                     .build();
+            switch (teams.size()){
+                case 4 -> match.setMaxGame(3);
+                case 2 -> match.setMaxGame(5);
+                default -> match.setMaxGame(1);
+            }
             matches.add(match);
-
         }
         return matches;
     }
