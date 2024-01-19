@@ -99,7 +99,7 @@ public class UserController {
      * @return
      */
     @PreAuthorize("isAuthenticated()")
-    @GetMapping("/search")
+    @PostMapping("/search")
     public ResponseEntity<List<UserGetAllDto>> getallbyspec(@RequestBody UserSearchForm form, Pageable pageable){
         return ResponseEntity.ok(userService.getAllBySpec(pageable, form).stream()
                 .map(UserGetAllDto::fromEntity)

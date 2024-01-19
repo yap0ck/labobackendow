@@ -7,10 +7,7 @@ import be.yapock.overwatchtournamentmanager.dal.models.compositeKey.TournamentTe
 import be.yapock.overwatchtournamentmanager.dal.models.enums.TournamentCategories;
 import be.yapock.overwatchtournamentmanager.dal.models.enums.TournamentStatus;
 import be.yapock.overwatchtournamentmanager.dal.models.jointable.TournamentTeams;
-import be.yapock.overwatchtournamentmanager.dal.repositories.TeamRepository;
-import be.yapock.overwatchtournamentmanager.dal.repositories.TournamentRepository;
-import be.yapock.overwatchtournamentmanager.dal.repositories.TournamentTeamRepository;
-import be.yapock.overwatchtournamentmanager.dal.repositories.UserRepository;
+import be.yapock.overwatchtournamentmanager.dal.repositories.*;
 import be.yapock.overwatchtournamentmanager.pl.models.tournament.dtos.TournamentDTOWithTeams;
 import be.yapock.overwatchtournamentmanager.pl.models.tournament.forms.TournamentForm;
 
@@ -50,6 +47,8 @@ class TournamentServiceImplTest {
     private Authentication authentication;
     @Mock
     private TournamentTeamRepository tournamentTeamRepository;
+    @Mock
+    private MatchRepository matchRepository;
     @InjectMocks
     private TournamentServiceImpl tournamentService;
     private Tournament entity;
@@ -99,6 +98,8 @@ class TournamentServiceImplTest {
 
     @Test
     void delete_when_ok(){
+        when(tournamentRepository.findById(anyLong())).thenReturn(Optional.of(entity));
+
         tournamentService.delete(1L);
 
         verify(tournamentRepository,times(1)).deleteById(anyLong());
@@ -160,7 +161,7 @@ class TournamentServiceImplTest {
         List<Long> teamList= new ArrayList<>();
         teamList.add(0L);
         TournamentTeamCompositeKey tournamentTeamCompositeKey = new TournamentTeamCompositeKey(team, entity);
-        TournamentTeams tournamentTeams = new TournamentTeams(tournamentTeamCompositeKey, LocalDate.now(), 1,team,entity);
+        TournamentTeams tournamentTeams = new TournamentTeams(tournamentTeamCompositeKey, LocalDate.now(), team,entity);
         when(tournamentRepository.findById(anyLong())).thenReturn(Optional.of(entity));
         when(tournamentTeamRepository.findAllByTournament(any(Tournament.class))).thenReturn(Collections.singletonList(tournamentTeams));
 

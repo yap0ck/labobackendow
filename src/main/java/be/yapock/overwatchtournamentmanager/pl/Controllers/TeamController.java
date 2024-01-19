@@ -27,7 +27,7 @@ public class TeamController {
      * @param form formulaire d'enregiqtrement d'une équipe
      * @param authentication authentification pour récuperer l'utilisateur de connecté
      */
-    @PreAuthorize("hasRole('ROLE_PLAYER')")
+    @PreAuthorize("isAuthenticated()")
     @PostMapping
     public void create(@RequestBody TeamForm form, Authentication authentication){
         teamService.create(form, authentication);
@@ -83,8 +83,9 @@ public class TeamController {
      * @param pageable parametres de pagination
      * @return une page de team en short dto
      */
-    @GetMapping("/search")
+    /*
+    @PostMapping("/search")
     public ResponseEntity<Page<TeamShortDto>> getAllBySpec(@RequestBody TeamSearchForm form, Pageable pageable){
         return ResponseEntity.ok(teamService.getAllBySpec(form, pageable).map(TeamShortDto::fromEntity));
-    }
+    }*/
 }

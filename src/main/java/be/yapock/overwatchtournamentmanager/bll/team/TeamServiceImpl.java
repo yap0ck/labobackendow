@@ -97,7 +97,7 @@ public class TeamServiceImpl implements TeamService {
                 .map(userService::getOne)
                 .toList();
         teamToUpdate.setCaptain(userService.getOne(form.Captainid()));
-        teamToUpdate.setPlayerList(userList);
+        teamToUpdate.setPlayerList(new ArrayList<>(userList));
         teamToUpdate.setAllWomen(userList.stream().noneMatch(e -> e.getGender() == 'M'|| e.getGender() == 'O'));
         teamRepository.save(teamToUpdate);
     }
@@ -136,11 +136,11 @@ public class TeamServiceImpl implements TeamService {
     private Specification<Team> createSpecification(TeamSearchForm form){
         return (((root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
-            if (form.name()!= null) predicates.add(criteriaBuilder.like(root.get("team_name"), "%" + form.name() + "%"));
-            if (form.captainId()!= null) predicates.add(criteriaBuilder.equal(root.get("captain_id"), form.captainId()));
+            if (form.name()!= null) predicates.add(criteriaBuilder.like(root.get("teamName"), "%" + form.name() + "%"));
+            if (form.captainId()!= null) predicates.add(criteriaBuilder.equal(root.get("captain"), form.captainId()));
             if (form.playerId()!=null) {
                 Join<Team, User> userJoin = root.join("playerList");
-                predicates.add(criteriaBuilder.equal(userJoin.get("user_id"),form.playerId()));
+                predicates.add(criteriaBuilder.equal(userJoin.get("user"),form.playerId()));
             }
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
         }));

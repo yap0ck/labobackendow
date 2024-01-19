@@ -18,7 +18,6 @@ public class TournamentTeams {
 
     private LocalDate registrationDate;
 
-    private int matchCount;
 
     @MapsId("teamId")
     @ManyToOne

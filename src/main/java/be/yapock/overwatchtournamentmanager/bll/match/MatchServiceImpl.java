@@ -29,7 +29,8 @@ public class MatchServiceImpl implements MatchService{
     @Override
     public void update(long id, ScoreUpdateForm form) {
         Match match = matchRepository.findById(id).orElseThrow(()-> new EntityNotFoundException("match pas trouvé"));
-        if (match.getCurrentRound() != match.getTournament().getRound()) throw new IllegalArgumentException("modification d'un score d'une ronde differente interdite");
+        Tournament tournament = tournamentRepository.findById(match.getTournament().getId()).orElseThrow(()-> new EntityNotFoundException("tournoi pas trouvé"));
+        if (match.getCurrentRound() != tournament.getRound()) throw new IllegalArgumentException("modification d'un score d'une ronde differente interdite");
         match.setScoreTeam1(form.scoreTeam1());
         match.setScoreTeam2(form.scoreTeam2());
         matchRepository.save(match);

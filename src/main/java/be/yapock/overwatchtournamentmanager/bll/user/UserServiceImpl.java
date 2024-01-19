@@ -163,11 +163,11 @@ public class UserServiceImpl implements UserService{
     private Specification<User> createSpecification(UserSearchForm form){
         return ((root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
-            if (form.username()!=null) predicates.add(criteriaBuilder.like(root.get("username"), "%"+form.username()+"%"));
+            if (form.username()!=null) predicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.get("username")), "%"+form.username().toLowerCase()+"%"));
             if (form.ranking()!=null) predicates.add(criteriaBuilder.like(root.get("ranking"), "%"+ form.ranking()+ "%"));
             if (form.email()!=null) predicates.add(criteriaBuilder.like(root.get("email"), "%"+ form.email()+"%"));
-            if (form.battleNet()!=null) predicates.add(criteriaBuilder.like(root.get("battle_net"),"%"+form.battleNet()+"%"));
-            if (form.inGameRole()!=null) predicates.add(criteriaBuilder.equal(root.get("in_game_roles"), form.inGameRole()));
+            if (form.battleNet()!=null) predicates.add(criteriaBuilder.like(root.get("battleNet"),"%"+form.battleNet()+"%"));
+            if (form.inGameRole()!=null) predicates.add(criteriaBuilder.equal(root.get("inGameRoles"), form.inGameRole()));
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
         });
     }

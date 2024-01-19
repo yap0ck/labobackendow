@@ -5,6 +5,7 @@ import be.yapock.overwatchtournamentmanager.dal.models.Match;
 import be.yapock.overwatchtournamentmanager.dal.models.Team;
 import be.yapock.overwatchtournamentmanager.dal.models.Tournament;
 import be.yapock.overwatchtournamentmanager.dal.models.User;
+import be.yapock.overwatchtournamentmanager.dal.models.compositeKey.TournamentTeamCompositeKey;
 import be.yapock.overwatchtournamentmanager.dal.models.enums.TournamentStatus;
 import be.yapock.overwatchtournamentmanager.dal.models.jointable.TournamentTeams;
 import be.yapock.overwatchtournamentmanager.dal.repositories.*;
@@ -175,7 +176,9 @@ public class TournamentServiceImpl implements TournamentService{
             } else throw new IllegalArgumentException("conditions d'inscription non respectée");
         }
 
+        TournamentTeamCompositeKey key = new TournamentTeamCompositeKey(team,tournament);
         TournamentTeams registration = TournamentTeams.builder()
+                .id(key)
                 .registrationDate(LocalDate.now())
                 .tournament(tournament)
                 .team(team)
@@ -206,7 +209,8 @@ public class TournamentServiceImpl implements TournamentService{
     public void start(long id) {
         Tournament tournament = tournamentRepository.findById(id).orElseThrow(()->new EntityNotFoundException("tournoi pas trouvé"));
         int nbTeam = tournamentTeamRepository.countByTournament(tournament);
-        if ( nbTeam <= tournament.getMinTeam() || tournament.getStartingDateTime().isBefore(LocalDateTime.now().minusMinutes(5))) throw new IllegalArgumentException("condition non respectée");
+        if ( nbTeam < tournament.getMinTeam() ||
+                tournament.getStartingDateTime().isBefore(LocalDateTime.now().minusMinutes(5))) throw new IllegalArgumentException("condition non respectée");
         tournament.setRound(1);
         tournament.setStatus(TournamentStatus.IN_PROGRESS);
         tournament.setUpdateDate(LocalDate.now());
@@ -214,21 +218,33 @@ public class TournamentServiceImpl implements TournamentService{
                 .map(TournamentTeams::getTeam)
                 .sorted(Comparator.comparingInt(Team::getTeamElo).reversed())
                 .toList();
-        List<Team> top = teamList.stream()
-                .filter(e -> teamList.indexOf(e)%2 == 0)
-                .toList();
-        List<Team> bottom = teamList.stream()
-                .filter(e -> teamList.indexOf(e)%2 != 0)
-                .toList();
 
-        List<Match> topMatches = drawMatches(top, tournament.getRound());
-        List<Match> bottomMatches = drawMatches(bottom, tournament.getRound());
+        List<Match> allMatches;
 
-        List<Match> allMatches = new ArrayList<>();
-        allMatches.addAll(topMatches);
-        allMatches.addAll(bottomMatches);
+        if (teamList.size()==2) {
+            allMatches = drawMatches(teamList, tournament.getRound());
+        } else {
+            allMatches = new ArrayList<>();
+            List<Team> top = teamList.stream()
+                    .filter(e -> teamList.indexOf(e)%2 == 0)
+                    .toList();
+            List<Team> bottom = teamList.stream()
+                    .filter(e -> teamList.indexOf(e)%2 != 0)
+                    .toList();
 
-        allMatches.forEach(e -> e.setMatchNumber(allMatches.indexOf(e)));
+            List<Match> topMatches = drawMatches(top, tournament.getRound());
+            List<Match> bottomMatches = drawMatches(bottom, tournament.getRound());
+
+
+            allMatches.addAll(topMatches);
+            allMatches.addAll(bottomMatches);
+        }
+
+
+        allMatches.forEach(e -> {
+            e.setMatchNumber(allMatches.indexOf(e));
+            e.setTournament(tournament);
+        });
 
         matchRepository.saveAll(allMatches);
 
@@ -299,20 +315,24 @@ public class TournamentServiceImpl implements TournamentService{
      */
     private List<Match> drawMatches(List<Team> teams, int currentRound) {
         List<Match> matches = new ArrayList<>();
+        teams = new ArrayList<>(teams);
         while (!teams.isEmpty()) {
             if (teams.size() % 2 != 0){
                 Match match = Match.builder()
-                        .team1(teams.removeFirst())
+                        .team1(teams.getFirst())
                         .isBye(true)
                         .currentRound(currentRound)
                         .build();
+                teams.removeFirst();
                 matches.add(match);
             }
             Match match = Match.builder()
-                    .team1(teams.removeFirst())
-                    .team2(teams.removeLast())
+                    .team1(teams.getFirst())
+                    .team2(teams.getLast())
                     .currentRound(currentRound)
                     .build();
+            teams.removeFirst();
+            teams.removeLast();
             switch (teams.size()){
                 case 4 -> match.setMaxGame(3);
                 case 2 -> match.setMaxGame(5);
