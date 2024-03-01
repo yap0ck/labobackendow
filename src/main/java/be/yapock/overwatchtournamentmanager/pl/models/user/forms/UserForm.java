@@ -22,7 +22,7 @@ public record UserForm(
         @NotNull @NotBlank
         LocalDate dateOfBirth,
         @NotNull @NotBlank
-        char gender,
+        String gender,
         String ranking,
         List<InGameRole> inGameRoles
 ) {

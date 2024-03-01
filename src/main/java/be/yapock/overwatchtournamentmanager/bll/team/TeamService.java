@@ -7,6 +7,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 
+import java.util.List;
+
 public interface TeamService {
     void create(TeamForm form, Authentication authentication);
     Team getOne(long id);
@@ -14,4 +16,5 @@ public interface TeamService {
     void update(TeamForm form, long id, Authentication authentication);
     void delete(long id, Authentication authentication);
     Page<Team> getAllBySpec(TeamSearchForm form, Pageable pageable);
+    List<Team> getAllByIds(List<Long> ids);
 }

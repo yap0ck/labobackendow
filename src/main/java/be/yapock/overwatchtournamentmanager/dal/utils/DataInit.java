@@ -35,11 +35,11 @@ public class DataInit implements InitializingBean {
         if (initialisation){
             Faker fakerFR = Faker.instance(new Locale("fr-FR"));
             User user = User.builder()
-                    .password(passwordEncoder.encode("string"))
-                    .gender('M')
+                    .password(passwordEncoder.encode("admin"))
+                    .gender("Homme")
                     .email("vagocol930@ziragold.com")
-                    .username("string")
-                    .userRoles(Collections.singletonList(UserRole.PLAYER))
+                    .username("admin")
+                    .userRoles(Collections.singletonList(UserRole.ADMIN))
                     .ranking("Master")
                     .inGameRoles(Collections.singletonList(InGameRole.TANK))
                     .dateOfBirth(LocalDate.now())
@@ -51,14 +51,14 @@ public class DataInit implements InitializingBean {
                 User user1 = User.builder()
                         .username(fakerFR.overwatch().hero())
                         .email(fakerFR.internet().emailAddress())
-                        .password(fakerFR.internet().password())
+                        .password(passwordEncoder.encode("Test1234="))
                         .battleNet(fakerFR.beer().name())
                         .userRoles(Collections.singletonList(UserRole.PLAYER))
                         .isEnabled(true)
                         .build();
                 if (i%2==0) {
-                    user1.setGender('M');
-                } else user1.setGender('F');
+                    user1.setGender("Homme");
+                } else user1.setGender("Femme");
                 switch (i%5){
                     case 0 -> {
                         user1.setInGameRoles(Collections.singletonList(InGameRole.TANK));

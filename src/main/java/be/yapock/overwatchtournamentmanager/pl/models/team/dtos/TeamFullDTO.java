@@ -11,9 +11,9 @@ public record TeamFullDTO(
         int teamElo,
         long id,
         String teamName,
-        User captain,
+        Long captainId,
         List<Long> playerList) {
     public static TeamFullDTO fromEntity(Team team){
-        return new TeamFullDTO(team.getCreationDate(), team.getTeamElo(), team.getId(), team.getTeamName(), team.getCaptain(),team.getPlayerList().stream().map(User::getId).toList());
+        return new TeamFullDTO(team.getCreationDate(), team.getTeamElo(), team.getId(), team.getTeamName(), team.getCaptain().getId(),team.getPlayerList().stream().map(User::getId).toList());
     }
 }

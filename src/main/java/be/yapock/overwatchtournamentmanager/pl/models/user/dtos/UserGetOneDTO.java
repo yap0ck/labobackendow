@@ -12,7 +12,7 @@ public record UserGetOneDTO(
         String username,
         String ranking,
         LocalDate dateOfBirth,
-        char gender,
+        String gender,
         List<InGameRole> inGameRoles,
         List<UserRole> userRoles
 ) {

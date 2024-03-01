@@ -24,6 +24,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -110,7 +111,7 @@ public class TournamentServiceImpl implements TournamentService{
      */
     @Override
     public List<Tournament> getAll() {
-        return tournamentRepository.findFirst10ByStatusOrderByUpdateDateDesc(TournamentStatus.REGISTRATION).stream()
+        return tournamentRepository.findAll().stream()
                 .peek(e -> e.setRegistrationNbr(tournamentTeamRepository.countByTournament(e)))
                 .toList();
     }
@@ -188,20 +189,6 @@ public class TournamentServiceImpl implements TournamentService{
     }
 
     /**
-     * Methode permettant le désenregistrement d'une équipe à un tournoi par le capitaine
-     * @param id du tournoi
-     * @param authentication utilisateur connecté
-     */
-    @Override
-    public void unregister(long id, Authentication authentication) {
-        User userConnected = userRepository.findByUsername(authentication.getName()).orElseThrow(()->new UsernameNotFoundException("utilisateur pas trouvé"));
-        Team team = teamRepository.findByCaptain(userConnected).orElseThrow(()->new EntityNotFoundException("équipe pas trouvée"));
-        Tournament tournament = tournamentRepository.findById(id).orElseThrow(()->new EntityNotFoundException("tournoi pas trouvé"));
-        if (!tournament.getStatus().equals(TournamentStatus.REGISTRATION) || !tournamentTeamRepository.existsByTeamAndTournament(team,tournament)) throw new IllegalArgumentException("condition non respectée");
-        tournamentTeamRepository.deleteByTeamAndTournament(team,tournament);
-    }
-
-    /**
      * démarre le tournoi
      * @param id du tournoi
      */
@@ -249,6 +236,21 @@ public class TournamentServiceImpl implements TournamentService{
         matchRepository.saveAll(allMatches);
 
         tournamentRepository.save(tournament);
+    }
+
+    /**
+     * Methode permettant le désenregistrement d'une équipe à un tournoi par le capitaine
+     * @param id du tournoi
+     * @param authentication utilisateur connecté
+     */
+    @Transactional
+    @Override
+    public void unregister(long id, Authentication authentication) {
+        User userConnected = userRepository.findByUsername(authentication.getName()).orElseThrow(()->new UsernameNotFoundException("utilisateur pas trouvé"));
+        Team team = teamRepository.findByCaptain(userConnected).orElseThrow(()->new EntityNotFoundException("équipe pas trouvée"));
+        Tournament tournament = tournamentRepository.findById(id).orElseThrow(()->new EntityNotFoundException("tournoi pas trouvé"));
+        if (!tournament.getStatus().equals(TournamentStatus.REGISTRATION) || !tournamentTeamRepository.existsByTeamAndTournament(team,tournament)) throw new IllegalArgumentException("condition non respectée");
+        tournamentTeamRepository.deleteByTeamAndTournament(team,tournament);
     }
 
     /**

@@ -13,6 +13,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/team")
 public class TeamController {
@@ -88,4 +90,10 @@ public class TeamController {
     public ResponseEntity<Page<TeamShortDto>> getAllBySpec(@RequestBody TeamSearchForm form, Pageable pageable){
         return ResponseEntity.ok(teamService.getAllBySpec(form, pageable).map(TeamShortDto::fromEntity));
     }*/
+
+    @PostMapping("/allbyid")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<List<TeamFullDTO>> getAllById(@RequestBody List<Long> ids){
+        return ResponseEntity.ok(teamService.getAllByIds(ids).stream().map(TeamFullDTO::fromEntity).toList());
+    }
 }

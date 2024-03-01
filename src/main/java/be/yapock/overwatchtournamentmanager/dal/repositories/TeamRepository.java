@@ -17,4 +17,5 @@ public interface TeamRepository extends JpaRepository<Team, Long>, JpaSpecificat
     @Query("SELECT t FROM Team t WHERE t.isAllWomen = :allWomen AND t.teamElo BETWEEN :min AND :max")
     List<Team> findAllByAllWomenAndTeamEloBetween(@Param("allWomen") boolean allWomen, @Param("min") int minElo, @Param("max") int maxElo);
     Optional<Team> findByCaptain(User user);
+
 }

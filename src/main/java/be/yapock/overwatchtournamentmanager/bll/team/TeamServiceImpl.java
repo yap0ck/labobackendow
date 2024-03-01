@@ -53,7 +53,7 @@ public class TeamServiceImpl implements TeamService {
                 .captain(userConnected)
                 .teamName(form.teamName())
                 .playerList(userList)
-                .isAllWomen(userList.stream().noneMatch(e -> e.getGender() == 'M' || e.getGender() == 'O'))
+                .isAllWomen(userList.stream().noneMatch(e -> false))
                 .build();
 
         teamRepository.save(team);
@@ -98,7 +98,7 @@ public class TeamServiceImpl implements TeamService {
                 .toList();
         teamToUpdate.setCaptain(userService.getOne(form.Captainid()));
         teamToUpdate.setPlayerList(new ArrayList<>(userList));
-        teamToUpdate.setAllWomen(userList.stream().noneMatch(e -> e.getGender() == 'M'|| e.getGender() == 'O'));
+        teamToUpdate.setAllWomen(userList.stream().noneMatch(e -> false));
         teamRepository.save(teamToUpdate);
     }
 
@@ -144,6 +144,10 @@ public class TeamServiceImpl implements TeamService {
             }
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
         }));
+    }
+    @Override
+    public List<Team> getAllByIds(List<Long> ids) {
+        return teamRepository.findAllById(ids);
     }
 
 

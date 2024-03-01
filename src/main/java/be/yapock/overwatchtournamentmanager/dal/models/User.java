@@ -27,24 +27,24 @@ public class User implements UserDetails {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Getter
     private long id;
-    @Column(length = 50, nullable = false)
+    @Column(length = 255, nullable = false)
     @Setter
     private String username;
-    @Column(length = 50, nullable = false)
+    @Column(length = 255, nullable = false)
     @Getter @Setter
     private String email;
-    @Column(length = 50, nullable = false)
+    @Column(length = 255, nullable = false)
     @Getter @Setter
     private String battleNet;
-    @Column(nullable = false)
+    @Column(length = 255,nullable = false)
     @Setter
     private String password;
     @Column(nullable = false)
     @Getter @Setter
     private LocalDate dateOfBirth;
-    @Column(nullable = false)
+    @Column(length = 50,nullable = false)
     @Getter @Setter
-    private char gender;
+    private String gender;
     @Column(length = 15, nullable = false)
     //TODO faire une enum
     @Getter @Setter
