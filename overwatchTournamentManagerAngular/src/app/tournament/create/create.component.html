@@ -1,0 +1,55 @@
+<div class="w-full flex row align-items-center justify-content-center">
+    <p-messages [(value)]="messages" [showTransitionOptions]="'500ms'" [hideTransitionOptions]="'500ms'" [enableService]="false"></p-messages>
+    <br>
+    <div class="surface-card p-4 shadow-2 border-round w-5">
+      <h1 class="text-center">Création de tournoi</h1>
+      <form [formGroup]="form" (ngSubmit)="create()">
+          <span class="p-float-label">
+            <input pInputText class="w-full" formControlName="name" id="name">
+            <label for="name">Nom</label>
+          </span>
+        <br>
+        <div class="flex row align-items-center justify-content-between">
+          <span class="p-float-label w-6">
+            <p-inputNumber formControlName="minTeam" [min]="2" [max]="32"  id="minTeam" [style]="{'box-sizing': 'border-box'}"></p-inputNumber>
+            <label for="minTeam">Nombre de team minimum</label>
+          </span>
+          <span class="p-float-label w-6">
+            <p-inputNumber formControlName="maxTeam" [min]="2" [max]="32" id="maxTeam" styleClass="w-full"></p-inputNumber>
+            <label for="minTeam">Nombre de team maximum</label>
+          </span>
+
+        </div>
+        <br>
+        <div class="flex row align-items-center justify-content-between">
+          <span class="p-float-label w-6">
+            <p-inputNumber formControlName="minElo" id="minElo"></p-inputNumber>
+            <label for="minElo">Elo minimum</label>
+          </span>
+            <span class="p-float-label w-6">
+            <p-inputNumber formControlName="maxElo" id="maxElo"></p-inputNumber>
+            <label for="maxElo">Elo maximum</label>
+          </span>
+        </div>
+        <br>
+        <span class="p-float-label">
+        <p-multiSelect formControlName="categories" [options]="categories" id="categories" styleClass="p-dropdown p-component p-inputwrapper p-input-icon-right" [style]="{'width': '100%'}"></p-multiSelect>
+        <label for="categories">Catégories</label>
+      </span>
+        <br>
+        <label for="womenOnly">Réservé aux Femmes </label>
+        <p-checkbox formControlName="isWomenOnly" id="womenOnly" [binary]="true"></p-checkbox>
+        <br>
+        <br>
+        <span class="p-float-label">
+        <p-calendar formControlName="startingDateTime" [showTime]="true" id="startingDateTime"></p-calendar>
+        <label for="startingDateTime">Date et heure de début</label>
+
+        </span>
+        <br>
+        <button pButton pRipple label="Enregistrer" type="submit" [disabled]="false" class="w-full"></button>
+      </form>
+
+    </div>
+</div>
+

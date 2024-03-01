@@ -1,0 +1,14 @@
+:host ::ng-deep .p-megamenu .p-megamenu-root-list {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  width: 100%;
+  padding: 0;
+}
+
+:host ::ng-deep .p-megamenu{
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  z-index: 5;
+}

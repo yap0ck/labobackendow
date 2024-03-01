@@ -1,0 +1,41 @@
+<div class="w-full flex row justify-content-evenly align-items-center">
+  <div class="surface-card p-4 shadow-2 border-round w-3">
+    <h1 class="text-center">{{tournament?.name}}</h1>
+    catégories: <div *ngFor="let c of tournament?.categories">{{c | titlecase}}</div>
+    <p>Nombre d'inscrits: {{tournament?.inscriptionNumber}}</p>
+    <p>Inscription jusqu'au {{tournament?.endingRegistration | date: 'dd/MM/YY - HH:mm'}}</p>
+    <p>Elo minimum: {{tournament?.minElo}}</p>
+    <p>Elo maximum: {{tournament?.maxElo}}</p>
+    <p>Nombre de team minimum: {{tournament?.minTeam}}</p>
+    <p>Nombre de team maximum: {{tournament?.maxTeam}}</p>
+    <p>Statut: {{tournament?.status}}</p>
+    <p>Ronde courante: {{tournament?.round}}</p>
+
+    <table>
+      <thead>
+      <tr>
+        <th>Nom de l'équipe</th>
+        <th>Elo de l'équipe</th>
+      </tr>
+      </thead>
+      <tr *ngFor="let t of teams">
+        <td>{{t.teamName}}</td>
+        <td>{{t.teamElo}}</td>
+      </tr>
+    </table>
+    <br>
+    <div class="flex row justify-content-evenly align-items-center">
+      <button pButton type="button" class="p-button-raised p-button-rounded w-4" label="Supprimer" icon="pi pi-trash" [disabled]="!isAdmin" (click)="delete()"></button>
+      <button pButton type="button" class="p-button-raised p-button-rounded w-4" label="Démarrer" icon="pi pi-play" [disabled]="!isAdmin" (click)="start()"></button>
+    </div>
+    <br>
+    <div class="flex row justify-content-evenly align-items-center">
+    <button pButton type="button" class="p-button-raised p-button-rounded w-4" label="s'inscrire" icon="pi pi-sign-in" (click)="register()"></button>
+    <button pButton type="button" class="p-button-raised p-button-rounded w-4" label="se désinscrire" icon="pi pi-sign-out" (click)="unregister()"></button>
+    </div>
+  </div>
+  <div *ngIf="isStarted" class="w-8">
+  <app-match [tournament]="tournament" [teams]="teams"></app-match>
+  </div>
+</div>
+

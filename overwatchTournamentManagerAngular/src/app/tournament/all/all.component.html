@@ -1,0 +1,40 @@
+<p-messages [(value)]="messages" [showTransitionOptions]="'500ms'" [hideTransitionOptions]="'500ms'" [enableService]="false"></p-messages>
+<p-table [value]="tournament" dataKey="id" [tableStyle]="{'width':'100%'}"
+  [paginator]="true" [rows]="10">
+  <ng-template pTemplate="header">
+    <tr>
+      <th pSortableColumn="name">Nom <p-sortIcon field="name"></p-sortIcon></th>
+      <th pSortableColumn="inscriptionNumber">Nombre d'inscrit <p-sortIcon field="inscriptionNumber"></p-sortIcon></th>
+      <th>Nombre d'équipe minimum</th>
+      <th>Nombre d'équipe maximum</th>
+      <th pSortableColumn="category">Catégorie <p-sortIcon field="category"></p-sortIcon></th>
+      <th pSortableColumn="eloMin">Elo minimum <p-sortIcon field="eloMin"></p-sortIcon></th>
+      <th pSortableColumn="eloMax">Elo maximum <p-sortIcon field="eloMax"></p-sortIcon></th>
+      <th pSortableColumn="status">Statut <p-sortIcon field="status"></p-sortIcon></th>
+      <th pSortableColumn="endingRegistration">fin des inscription <p-sortIcon field="endingRegistration"></p-sortIcon></th>
+      <th>Ronde</th>
+      <th>Actions</th>
+    </tr>
+  </ng-template>
+  <ng-template pTemplate="body" let-tournament>
+    <tr>
+      <td>{{tournament.name}}</td>
+      <td>{{tournament.inscriptionNumber}}</td>
+      <td>{{tournament.minTeam}}</td>
+      <td>{{tournament.maxTeam}}</td>
+      <td><div *ngFor="let c of tournament.categories">{{c | uppercase | titlecase}}</div></td>
+      <td>{{tournament.minElo}}</td>
+      <td>{{tournament.maxElo}}</td>
+      <td>{{tournament.status | uppercase | titlecase}}</td>
+      <td>{{tournament.endingRegistration | date: 'dd/MM/YYY - HH:mm'}}</td>
+      <td>{{tournament.round}}</td>
+      <td>
+        <div class="flex row justify-content-between align-items-center">
+          <button pButton type="button" class="p-button-raised p-button-rounded" icon="pi pi-trash" [disabled]="!isAdmin" (click)="delete(tournament.id)"></button>
+          <button pButton type="button" class="p-button-raised p-button-rounded" icon="pi pi-search" [routerLink]="['../one', tournament.id]"></button>
+        </div>
+
+      </td>
+    </tr>
+  </ng-template>
+</p-table>

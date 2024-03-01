@@ -1,0 +1,8 @@
+<tr *ngFor="let m of matches; index as i" class="border-bottom-2 w-1rem border-solid">
+    <td class="surface-card p-4 m-3 shadow-2 border-round h-2rem">Round {{tournament?.round}}</td>
+    <div class="surface-card p-4 m-3 shadow-2 border-round h-full">
+    <td class="h-full">{{teamNames.get((m.team1Id))}} <p-inputNumber [(ngModel)]="matchFormGroup[i].scoreTeam1" class="w-5rem" [size]="1" [disabled]="!isAdmin">{{m.scoreTeam1}}</p-inputNumber></td>
+    <td class="h-full">{{teamNames.get((m.teamId))}} <p-inputNumber [(ngModel)]="matchFormGroup[i].scoreTeam2" class="w-5rem" [size]="1" [disabled]="!isAdmin">{{m.scoreTeam2}}</p-inputNumber></td>
+    <td><button pButton type="submit" class="p-button-raised p-button-rounded" icon="pi pi-check" [disabled]="!isAdmin" (click)="onSubmit(i)"></button></td>
+    </div>
+</tr>

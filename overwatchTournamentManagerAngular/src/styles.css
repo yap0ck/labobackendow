@@ -1,0 +1,21 @@
+/* You can add global styles to this file, and also import other style files */
+@import "primeng/resources/themes/lara-light-amber/theme.css";
+@import "primeng/resources/primeng.css";
+@import "primeicons/primeicons.css";
+@import "primeflex/primeflex.css";
+
+body{
+  margin: 0;
+  background-image: url("https://preview.redd.it/zb3xi6whbsr41.jpg?width=3840&format=pjpg&auto=webp&s=2d43fb7307088ac8c21cff337e5202add8f9f762");
+  background-size: cover;
+}
+
+@font-face {
+  font-family: "big noodle";
+  src: url("/assets/font/bignoodletitling/big_noodle_titling_oblique.ttf") format("woff2");
+}
+
+h1{
+  font-family: "big noodle", serif;
+  color: darkorange;
+}
